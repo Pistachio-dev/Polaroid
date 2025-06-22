@@ -1,14 +1,15 @@
-﻿using System;
+using System;
 using System.Numerics;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using Lumina.Excel.Sheets;
 
 namespace SamplePlugin.Windows;
 
-public class MainWindow : Window, IDisposable
+public unsafe class MainWindow : Window, IDisposable
 {
     private string GoatImagePath;
     private Plugin Plugin;
@@ -51,6 +52,16 @@ public class MainWindow : Window, IDisposable
         // This works for all ImGui functions that require specific handling, examples are BeginTable() or Indent().
         using (var child = ImRaii.Child("SomeChildWithAScrollbar", Vector2.Zero, true))
         {
+            if (ImGui.Button("Show HUD"))
+            {
+                ShowHud();
+            }
+
+            if (ImGui.Button("Hide HUD"))
+            {
+                HideHud();
+            }
+
             // Check if this child is drawing
             if (child.Success)
             {
@@ -101,6 +112,33 @@ public class MainWindow : Window, IDisposable
                     ImGui.TextUnformatted("Invalid territory.");
                 }
             }
+        }        
+    }
+
+    private bool uiHidden = false;
+    private AgentHUD* savedAgentHud = null;
+
+    private unsafe void ToggleHud()
+    {
+        if (uiHidden)
+        {
+            AgentHUD.Instance()->Show();
         }
+        else
+        {
+            AgentHUD.Instance()->Hide();
+        }
+        uiHidden = !uiHidden;
+    }
+
+    private unsafe void ShowHud()
+    {
+
+        Plugin.UIVisControl.UpdateAddonVisibility(true);
+    }
+
+    private unsafe void HideHud()
+    {
+        Plugin.UIVisControl.UpdateAddonVisibility(false);
     }
 }

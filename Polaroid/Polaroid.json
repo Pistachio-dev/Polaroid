@@ -1,0 +1,14 @@
+{
+  "Author": "Pistachio Herald",
+  "Name": "Polaroid",
+  "Punchline": "Makes /photograph take an actual picture.",
+  "Description": "Makes /photograph take an actual picture",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "instapix",
+    "photograph",
+    "photo",
+    "screenshot",
+    "gpose"
+  ]
+}
