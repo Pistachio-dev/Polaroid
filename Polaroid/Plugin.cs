@@ -7,6 +7,9 @@ using Dalamud.Plugin.Services;
 using SamplePlugin.Windows;
 using ImGuiNET;
 using FaderPlugin;
+using Polaroid.EmoteDetection;
+using System.Diagnostics;
+using System;
 
 namespace SamplePlugin;
 
@@ -17,12 +20,14 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
-
+    [PluginService] internal static IFramework Framework { get; private set; } = null!;
     [PluginService] internal static ICondition Condition { get; private set; } = null!;
     [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
+    [PluginService] internal static IGameInteropProvider SigScanner { get; private set; } = null!;
 
     public UIVisibilityControl UIVisControl { get; }
+    public EmoteReaderHooks emoteReader;
 
     private const string CommandName = "/polaroid";
 
@@ -36,6 +41,7 @@ public sealed class Plugin : IDalamudPlugin
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         UIVisControl = new UIVisibilityControl(Condition, ClientState, GameGui);
+        emoteReader = new EmoteReaderHooks();
 
         // you might normally want to embed resources and load them from the manifest stream
         var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
@@ -64,6 +70,33 @@ public sealed class Plugin : IDalamudPlugin
         // Use /xllog to open the log window in-game
         // Example Output: 00:57:54.959 | INF | [SamplePlugin] ===A cool log message from Sample Plugin===
         Log.Information($"===A cool log message from {PluginInterface.Manifest.Name}===");
+    }
+
+    private static Stopwatch PhotoStopwatch = new Stopwatch();
+    internal static bool CountTime = false;
+    
+    internal static void TimePhoto(IFramework framework)
+    {
+        if (!PhotoStopwatch.IsRunning)
+        {
+            PhotoStopwatch.Start();
+        }
+
+        if (PhotoStopwatch.Elapsed >= TimeSpan.FromSeconds(10))
+        {
+            PhotoStopwatch.Reset();
+            framework.Update -= TimePhoto;
+        }
+
+        if (CountTime)
+        {
+            //Log.Info(PhotoStopwatch.ElapsedMilliseconds.ToString());
+        }
+        else
+        {
+            Log.Info(PhotoStopwatch.ElapsedMilliseconds.ToString());
+            PhotoStopwatch.Reset();            
+        }
     }
 
     public void Dispose()

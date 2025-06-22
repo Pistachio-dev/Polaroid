@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Polaroid", "Polaroid\Polaro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "faderPlugin", "xivFaderPlugin\FaderPlugin\faderPlugin.csproj", "{B88ECFF0-4806-B580-D00D-F22D8DE59497}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brio", "Brio\Brio\Brio.csproj", "{33450635-E82C-BC0F-7BE6-ED371A0AE1B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,10 @@ Global
 		{B88ECFF0-4806-B580-D00D-F22D8DE59497}.Debug|x64.Build.0 = Debug|x64
 		{B88ECFF0-4806-B580-D00D-F22D8DE59497}.Release|x64.ActiveCfg = Release|x64
 		{B88ECFF0-4806-B580-D00D-F22D8DE59497}.Release|x64.Build.0 = Release|x64
+		{33450635-E82C-BC0F-7BE6-ED371A0AE1B2}.Debug|x64.ActiveCfg = Debug|x64
+		{33450635-E82C-BC0F-7BE6-ED371A0AE1B2}.Debug|x64.Build.0 = Debug|x64
+		{33450635-E82C-BC0F-7BE6-ED371A0AE1B2}.Release|x64.ActiveCfg = Release|x64
+		{33450635-E82C-BC0F-7BE6-ED371A0AE1B2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

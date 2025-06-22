@@ -1,3 +1,6 @@
 [submodule "xivFaderPlugin"]
 	path = xivFaderPlugin
 	url = https://github.com/Pistachio-dev/xivFaderPlugin.git
+[submodule "Brio"]
+	path = Brio
+	url = https://github.com/Etheirys/Brio.git

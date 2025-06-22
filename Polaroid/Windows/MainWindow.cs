@@ -3,9 +3,11 @@ using System.Numerics;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using Lumina.Excel.Sheets;
+using Polaroid;
 
 namespace SamplePlugin.Windows;
 
@@ -43,6 +45,15 @@ public unsafe class MainWindow : Window, IDisposable
         if (ImGui.Button("Show Settings"))
         {
             Plugin.ToggleConfigUI();
+        }
+
+        if (ImGui.Button("Stop stopwatch"))
+        {
+            Plugin.CountTime = false;
+        }
+        if (ImGui.Button("List bones"))
+        {
+            CameraControl.PositionOnPhotographCamera();
         }
 
         ImGui.Spacing();
