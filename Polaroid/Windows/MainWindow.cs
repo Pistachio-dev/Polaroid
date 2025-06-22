@@ -56,6 +56,11 @@ public unsafe class MainWindow : Window, IDisposable
             CameraControl.PositionOnPhotographCamera();
         }
 
+        if (ImGui.Button("Reposition camera?"))
+        {
+            CameraControl.TestCameraSetting();
+        }
+
         ImGui.Spacing();
 
         // Normally a BeginChild() would have to be followed by an unconditional EndChild(),

@@ -4,6 +4,3 @@
 [submodule "Brio"]
 	path = Brio
 	url = https://github.com/Etheirys/Brio.git
-[submodule "Cammy"]
-	path = Cammy
-	url = https://github.com/UnknownX7/Cammy.git

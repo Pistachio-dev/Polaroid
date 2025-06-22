@@ -2,13 +2,9 @@ using Brio.Game.Actor.Extensions;
 using Brio.Game.Posing.Skeletons;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
-using Lumina.Data.Parsing;
 using SamplePlugin;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Numerics;
 
 namespace Polaroid
 {
@@ -42,7 +38,16 @@ namespace Polaroid
                 return;
             }
 
-            var transform = leftIndexFingerTipBone.LastTransform;
+            var transform = leftIndexFingerTipBone.LastTransform;            
+        }
+
+        private Vector3 OldPos = new Vector3(0, 0, 0);
+        public unsafe static void TestCameraSetting()
+        {
+            //var camera = CameraManager.Instance()->Camera;
+            //var sceneCamera = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CameraManager.Instance()->CurrentCamera;
+            //sceneCamera->Position = new FFXIVClientStructs.FFXIV.Common.Math.Vector3(0, 0, 2);
+            //sceneCamera->LookAtVector = new FFXIVClientStructs.FFXIV.Common.Math.Vector3(0, 0, 2);
         }
 
         internal void Reset()
