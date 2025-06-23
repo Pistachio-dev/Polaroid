@@ -53,12 +53,22 @@ public unsafe class MainWindow : Window, IDisposable
         }
         if (ImGui.Button("List bones"))
         {
-            CameraControl.PositionOnPhotographCamera();
+            CameraControl.EnableCodeMovable();
         }
 
-        if (ImGui.Button("Reposition camera?"))
+        if (ImGui.Button("Enable code movable"))
         {
-            CameraControl.TestCameraSetting();
+            CameraControl.EnableCodeMovable();
+        }
+
+        if (ImGui.Button("Nudge camera"))
+        {
+            CameraControl.NudgeCamera();
+        }
+
+        if (ImGui.Button("Disable code movable"))
+        {
+            CameraControl.DisableCodeMovableCamera();
         }
 
         ImGui.Spacing();

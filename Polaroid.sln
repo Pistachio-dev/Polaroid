@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "faderPlugin", "xivFaderPlug
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brio", "Brio\Brio\Brio.csproj", "{33450635-E82C-BC0F-7BE6-ED371A0AE1B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cammy", "Cammy\Cammy.csproj", "{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -27,6 +29,10 @@ Global
 		{33450635-E82C-BC0F-7BE6-ED371A0AE1B2}.Debug|x64.Build.0 = Debug|x64
 		{33450635-E82C-BC0F-7BE6-ED371A0AE1B2}.Release|x64.ActiveCfg = Release|x64
 		{33450635-E82C-BC0F-7BE6-ED371A0AE1B2}.Release|x64.Build.0 = Release|x64
+		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Debug|x64.ActiveCfg = Debug|x64
+		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Debug|x64.Build.0 = Debug|x64
+		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Release|x64.ActiveCfg = Release|x64
+		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

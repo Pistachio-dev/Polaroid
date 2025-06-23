@@ -1,16 +1,14 @@
 using Dalamud.Game.Command;
+using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
-using System.IO;
-using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using SamplePlugin.Windows;
-using ImGuiNET;
 using FaderPlugin;
 using Polaroid.EmoteDetection;
-using System.Diagnostics;
+using SamplePlugin.Windows;
 using System;
-
+using System.Diagnostics;
+using System.IO;
 namespace SamplePlugin;
 
 public sealed class Plugin : IDalamudPlugin
@@ -28,7 +26,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public UIVisibilityControl UIVisControl { get; }
     public EmoteReaderHooks emoteReader;
-
+    public static Cammy.Cammy CammyPlugin { get; private set; }
     private const string CommandName = "/polaroid";
 
     public Configuration Configuration { get; init; }
@@ -40,6 +38,7 @@ public sealed class Plugin : IDalamudPlugin
     public Plugin()
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        CammyPlugin = new Cammy.Cammy(PluginInterface);
         UIVisControl = new UIVisibilityControl(Condition, ClientState, GameGui);
         emoteReader = new EmoteReaderHooks();
 
