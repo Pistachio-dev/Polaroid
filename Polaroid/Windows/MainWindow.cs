@@ -61,6 +61,10 @@ public unsafe class MainWindow : Window, IDisposable
             CameraControl.EnableCodeMovable();
         }
 
+        if (ImGui.Button("Set to character"))
+        {
+            CameraControl.SetToCharacterPos();
+        }
         if (ImGui.Button("Nudge camera"))
         {
             CameraControl.NudgeCamera();
