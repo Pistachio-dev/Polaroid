@@ -8,7 +8,7 @@ using static FFXIVClientStructs.FFXIV.Client.UI.Misc.AchievementListModule.Deleg
 
 
 // Taken from https://github.com/MgAl2O4/PatMeDalamud and modified by me as needed
-namespace Polaroid.EmoteDetection
+namespace Polaroid.Services.EmoteDetection
 {    
     public class EmoteReaderHooks : IDisposable
     {

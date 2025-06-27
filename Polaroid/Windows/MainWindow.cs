@@ -40,11 +40,13 @@ public unsafe class MainWindow : Window, IDisposable
         // These expect formatting parameter if any part of the text contains a "%", which we can't
         // provide through our bindings, leading to a Crash to Desktop.
         // Replacements can be found in the ImGuiHelpers Class
-        ImGui.TextUnformatted($"The random config bool is {Plugin.Configuration.SomePropertyToBeSavedAndWithADefault}");
-
-        if (ImGui.Button("Show Settings"))
+        if (ImGui.Button("Enumerate draw entities"))
         {
-            Plugin.ToggleConfigUI();
+            CameraControl.EnumerateDrawEntities();
+        }
+        if (ImGui.Button("Bones"))
+        {
+            CameraControl.SkeletonShenanigans();
         }
 
         if (ImGui.Button("Stop stopwatch"))
@@ -75,6 +77,10 @@ public unsafe class MainWindow : Window, IDisposable
             CameraControl.DisableCodeMovableCamera();
         }
 
+        if (ImGui.Button("Log positions"))
+        {
+            CameraControl.LogPositionForPlayerAndTarget();
+        }
         ImGui.Spacing();
 
         // Normally a BeginChild() would have to be followed by an unconditional EndChild(),

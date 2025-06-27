@@ -4,7 +4,7 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FaderPlugin;
-using Polaroid.EmoteDetection;
+using Polaroid.Services.EmoteDetection;
 using SamplePlugin.Windows;
 using System;
 using System.Diagnostics;

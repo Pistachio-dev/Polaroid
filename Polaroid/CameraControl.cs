@@ -1,20 +1,142 @@
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Actor.Interop;
 using Brio.Game.Posing.Skeletons;
 using Cammy;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using FFXIVClientStructs.STD;
 using Hypostasis.Game;
 using Hypostasis.Game.Structures;
 using SamplePlugin;
 using Serilog;
+using Swan;
 using System;
 using System.Linq;
 using System.Numerics;
+using System.Text;
+using NativeBone = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton.Bone;
 
 namespace Polaroid
 {
     public class CameraControl
     {
+        public static unsafe void SkeletonShenanigans()
+        {
+            IPlayerCharacter player = Plugin.ClientState.LocalPlayer;
+            ICharacter asICharacter = (ICharacter)player;
+            BrioCharacterBase* characterBasePointer = asICharacter.GetCharacterBase();
+            Skeleton? skeleton = Skeleton.Create(characterBasePointer->CharacterBase.Skeleton);
+            if (skeleton == null)
+            {
+                Plugin.Log.Error("Could not fetch current player skeleton. Calcium deficit, probably");
+                return;
+            }
+            foreach (var bone in skeleton.Bones)
+            {
+                //Plugin.Log.Info($"{bone.FriendlyName}: {bone.Index} {bone.LastTransform.Humanize()}");
+            }
+
+            var leftIndexFingerTipBone = skeleton.Bones.FirstOrDefault(bone => bone.FriendlyName == "j_ko_b_l");
+            if (leftIndexFingerTipBone == null)
+            {
+                Plugin.Log.Error("Could not get the index finger bone. Is this a yakuza movie?");
+                return;
+            }
+
+            Plugin.Log.Info($"{leftIndexFingerTipBone.FriendlyName}: {leftIndexFingerTipBone.Index}");
+            Plugin.Log.Info($"{leftIndexFingerTipBone.LastTransform.Humanize()}");
+            Plugin.Log.Info($"{leftIndexFingerTipBone.LastRawTransform.Humanize()}");
+
+            //var native = player.Native();
+
+        }
+
+        public static unsafe void EnumerateDrawEntities()
+        {
+            World world = *World.Instance();
+            FFXIVClientStructs.FFXIV.Client.Graphics.Scene.Object o = world.Object;
+
+            EnumerateDrawEntitiesRecursive(o, 0);
+        }
+
+        private static unsafe void EnumerateDrawEntitiesRecursive(FFXIVClientStructs.FFXIV.Client.Graphics.Scene.Object o, int depth)
+        {
+            
+            int safetyCounter = 0;
+            var player = Plugin.ClientState.LocalPlayer;
+            foreach (var child in o.ChildObjects)
+            {
+                if (safetyCounter >= 500000)
+                {
+                    Plugin.Log.Warning("Safety counter pulled us out!");
+                    return;
+                }
+                safetyCounter++;
+                var type = child->GetObjectType();
+                if (type == ObjectType.CharacterBase)
+                {
+                    var chara = (CharacterBase*)child;
+                    if (player != null)
+                    {
+                        if (AreEqual(chara->Position, player.Position))
+                        {
+                            Plugin.Log.Info("FOUND THE PLAYER AT " + safetyCounter);
+                            Plugin.Log.Info($"Scene pos: {chara->Position}");
+                            Plugin.Log.Info($"Scene rot: {chara->Rotation}");
+                            Plugin.Log.Info($"Logic pos: {player.Position}");
+                            Plugin.Log.Info($"Logic rot: {player.Rotation}");
+                            Plugin.Log.Info($"Sklt pos: {chara->Skeleton->Transform.Position}");
+                            Plugin.Log.Info($"Sklt rot: {chara->Skeleton->Transform.Rotation}");
+                            SkeltonStuff(chara);
+                            return;
+                        }
+                    }
+                    
+                }
+                Plugin.Log.Info(type.ToString());
+                //if (o.ChildObject != null)
+                //{
+                //    EnumerateDrawEntitiesRecursive(*o.ChildObject, depth + 1);
+                //}
+            }
+        }
+
+        private static unsafe void SkeltonStuff(CharacterBase* chara)
+        {
+            var skl = *chara->Skeleton;
+            var bonePointer = skl.AttachBones;
+            Plugin.Log.Info("Bone count: " + skl.AttachBoneCount);
+            for (int i = 0; i < skl.AttachBoneCount; i++)
+            {
+                
+                NativeBone b = *(bonePointer + sizeof(NativeBone) * i);
+                Plugin.Log.Info($"Bone {b.BoneIndex}");//: {b.BoneName}");
+
+                //StringBuilder s = new StringBuilder();
+                //if (b.BoneName == null)
+                //{
+                //    continue;
+                //}
+                //int limit = (int)Math.Min(40, b.BoneName.Length);
+                //for (int k = 0; k < limit; k++)
+                //{
+                //    s.Append(b.BoneName[k]);
+                //}
+                //Plugin.Log.Info($"Name: {s}");//: {b.BoneName}");
+            }
+        }
+
+        private static bool AreEqual(Vector3 a, Vector3 b)
+        {
+            return AreEqual(a.X, b.X) && AreEqual(a.Y, b.Y); //&& AreEqual(a.Z, b.Z);
+        }
+
+        private static bool AreEqual(float a, float b)
+        {
+            return Math.Abs(a - b) <= 0.0001;
+        }
+
         public static unsafe void EnableCodeMovable()
         {
             if (Plugin.ClientState.LocalPlayer == null)
@@ -91,6 +213,8 @@ namespace Polaroid
             CodeMovableCamera.Zoom = 0;
             // Make it work well for Au Ra first, then you can go back to adjusting.
 
+            Plugin.Log.Info($"Current target: {(character.TargetObject == null ? "Nobody"
+                : character.TargetObject.GetFriendlyName())}");
             // Apply LookTo
             if (character.TargetObject != null)
             {
@@ -191,6 +315,23 @@ namespace Polaroid
 
             //Cammy.Cammy cammy = Plugin.CammyPlugin;
             //Cammy.FreeCam.Toggle();
+        }
+
+        public unsafe static void LogPositionForPlayerAndTarget()
+        {
+            var player = Plugin.ClientState.LocalPlayer;
+            if (player == null)
+            {
+                Plugin.Log.Info("Player: null");
+                return;
+            }
+
+            Plugin.Log.Info($"Player: {player.Position}");
+            if (player.TargetObject == null)
+            {
+                Plugin.Log.Info("Target: null");
+                return;
+            }
         }
 
         internal void Reset()
