@@ -20,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Brio\Brio\Brio.csproj" />
     <ProjectReference Include="..\Cammy\Cammy.csproj" />
     <ProjectReference Include="..\xivFaderPlugin\FaderPlugin\faderPlugin.csproj" />
   </ItemGroup>

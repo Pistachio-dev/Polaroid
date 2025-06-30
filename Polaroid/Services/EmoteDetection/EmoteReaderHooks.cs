@@ -1,7 +1,7 @@
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
-using SamplePlugin;
+using Polaroid;
 using System;
 using System.Linq;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.AchievementListModule.Delegates;

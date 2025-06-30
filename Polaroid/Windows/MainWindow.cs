@@ -8,13 +8,17 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using Lumina.Excel.Sheets;
 using Polaroid;
+using Polaroid.Services;
+using Polaroid.Services.Camera;
+using Polaroid.Windows.Widgets;
 
-namespace SamplePlugin.Windows;
+namespace Polaroid.Windows;
 
 public unsafe class MainWindow : Window, IDisposable
 {
     private string GoatImagePath;
     private Plugin Plugin;
+    private CameraControlUI cameraControlUI;
 
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
@@ -30,125 +34,95 @@ public unsafe class MainWindow : Window, IDisposable
 
         GoatImagePath = goatImagePath;
         Plugin = plugin;
+        cameraControlUI= new CameraControlUI();
     }
 
     public void Dispose() { }
 
     public override void Draw()
     {
-        // Do not use .Text() or any other formatted function like TextWrapped(), or SetTooltip().
-        // These expect formatting parameter if any part of the text contains a "%", which we can't
-        // provide through our bindings, leading to a Crash to Desktop.
-        // Replacements can be found in the ImGuiHelpers Class
-        if (ImGui.Button("Enumerate draw entities"))
-        {
-            CameraControl.EnumerateDrawEntities();
-        }
-        if (ImGui.Button("Bones"))
-        {
-            CameraControl.SkeletonShenanigans();
-        }
-
-        if (ImGui.Button("Stop stopwatch"))
-        {
-            Plugin.CountTime = false;
-        }
-        if (ImGui.Button("List bones"))
-        {
-            CameraControl.EnableCodeMovable();
-        }
-
-        if (ImGui.Button("Enable code movable"))
-        {
-            CameraControl.EnableCodeMovable();
-        }
-
-        if (ImGui.Button("Set to character"))
-        {
-            CameraControl.SetToCharacterPos();
-        }
-        if (ImGui.Button("Nudge camera"))
-        {
-            CameraControl.NudgeCamera();
-        }
-
-        if (ImGui.Button("Disable code movable"))
-        {
-            CameraControl.DisableCodeMovableCamera();
-        }
+        cameraControlUI.Draw();
+        ImGui.Separator();
 
         if (ImGui.Button("Log positions"))
         {
             CameraControl.LogPositionForPlayerAndTarget();
         }
+        if (ImGui.BeginTabBar("Main tooling tabs", ImGuiTabBarFlags.None)){
+            if (ImGui.BeginTabItem("Camera"))
+            {
+                if (ImGui.Button("Enable code movable"))
+                {
+                    CameraControl.EnableCodeMovable();
+                }
+
+                if (ImGui.Button("Set to character"))
+                {
+                    CameraControl.SetToCharacterPos();
+                }
+
+                if (ImGui.Button("Nudge camera"))
+                {
+                    CameraControl.NudgeCamera();
+                }
+
+                if (ImGui.Button("Disable code movable"))
+                {
+                    CameraControl.DisableCodeMovableCamera();
+                }
+
+                ImGui.EndTabItem();
+            }
+            if (ImGui.BeginTabItem("Timing"))
+            {
+                if (ImGui.Button("Stop stopwatch"))
+                {
+                    Plugin.CountTime = false;
+                }
+
+                ImGui.EndTabItem();
+            }
+            if (ImGui.BeginTabItem("Scanning"))
+            {
+                if (ImGui.Button("Scan target"))
+                {
+                    Utilities.DumpGameObject(Plugin.ClientState.LocalPlayer?.TargetObject);
+                }
+                if (ImGui.Button("Enumerate draw entities"))
+                {
+                    CameraControl.EnumerateDrawEntities();
+                }
+
+                ImGui.EndTabItem();
+            }
+            if (ImGui.BeginTabItem("HUD"))
+            {
+                if (ImGui.Button("Show HUD"))
+                {
+                    ShowHud();
+                }
+
+                if (ImGui.Button("Hide HUD"))
+                {
+                    HideHud();
+                }
+            }
+            if (ImGui.BeginTabItem("Calibration"))
+            {
+                if (ImGui.Button("Move to player pos") && Plugin.ClientState.LocalPlayer != null) {
+                    CalibrationService.MoveDot(Plugin.ClientState.LocalPlayer.Position);
+                }
+                if (ImGui.Button("Move to target pos") && Plugin.ClientState.LocalPlayer?.TargetObject != null)
+                {
+                    CalibrationService.MoveDot(Plugin.ClientState.LocalPlayer.TargetObject.Position);
+                }
+                CalibrationService.Draw(Plugin.ClientState.LocalPlayer!);
+
+            }
+
+            ImGui.EndTabBar();
+        }
         ImGui.Spacing();
-
-        // Normally a BeginChild() would have to be followed by an unconditional EndChild(),
-        // ImRaii takes care of this after the scope ends.
-        // This works for all ImGui functions that require specific handling, examples are BeginTable() or Indent().
-        using (var child = ImRaii.Child("SomeChildWithAScrollbar", Vector2.Zero, true))
-        {
-            if (ImGui.Button("Show HUD"))
-            {
-                ShowHud();
-            }
-
-            if (ImGui.Button("Hide HUD"))
-            {
-                HideHud();
-            }
-
-            // Check if this child is drawing
-            if (child.Success)
-            {
-                ImGui.TextUnformatted("Have a goat:");
-                var goatImage = Plugin.TextureProvider.GetFromFile(GoatImagePath).GetWrapOrDefault();
-                if (goatImage != null)
-                {
-                    using (ImRaii.PushIndent(55f))
-                    {
-                        ImGui.Image(goatImage.ImGuiHandle, new Vector2(goatImage.Width, goatImage.Height));
-                    }
-                }
-                else
-                {
-                    ImGui.TextUnformatted("Image not found.");
-                }
-
-                ImGuiHelpers.ScaledDummy(20.0f);
-
-                // Example for other services that Dalamud provides.
-                // ClientState provides a wrapper filled with information about the local player object and client.
-
-                var localPlayer = Plugin.ClientState.LocalPlayer;
-                if (localPlayer == null)
-                {
-                    ImGui.TextUnformatted("Our local player is currently not loaded.");
-                    return;
-                }
-
-                if (!localPlayer.ClassJob.IsValid)
-                {
-                    ImGui.TextUnformatted("Our current job is currently not valid.");
-                    return;
-                }
-
-                // ExtractText() should be the preferred method to read Lumina SeStrings,
-                // as ToString does not provide the actual text values, instead gives an encoded macro string.
-                ImGui.TextUnformatted($"Our current job is ({localPlayer.ClassJob.RowId}) \"{localPlayer.ClassJob.Value.Abbreviation.ExtractText()}\"");
-
-                // Example for quarrying Lumina directly, getting the name of our current area.
-                var territoryId = Plugin.ClientState.TerritoryType;
-                if (Plugin.DataManager.GetExcelSheet<TerritoryType>().TryGetRow(territoryId, out var territoryRow))
-                {
-                    ImGui.TextUnformatted($"We are currently in ({territoryId}) \"{territoryRow.PlaceName.Value.Name.ExtractText()}\"");
-                }
-                else
-                {
-                    ImGui.TextUnformatted("Invalid territory.");
-                }
-            }
-        }        
     }
 
     private bool uiHidden = false;

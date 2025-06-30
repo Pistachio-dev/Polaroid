@@ -5,11 +5,11 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FaderPlugin;
 using Polaroid.Services.EmoteDetection;
-using SamplePlugin.Windows;
+using Polaroid.Windows;
 using System;
 using System.Diagnostics;
 using System.IO;
-namespace SamplePlugin;
+namespace Polaroid;
 
 public sealed class Plugin : IDalamudPlugin
 {
