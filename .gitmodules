@@ -4,3 +4,6 @@
 [submodule "Cammy"]
 	path = Cammy
 	url = https://github.com/Pistachio-dev/Cammy.git
+[submodule "ECommons"]
+	path = ECommons
+	url = https://github.com/NightmareXIV/ECommons.git
