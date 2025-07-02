@@ -29,20 +29,22 @@ namespace Polaroid.Services.Image
 {
     public unsafe static class ScreenshotService // TODO: Make it inherit IDisposable
     {
+        public static string? LastScreenshotPath = null;
         private const int ScreenshotRetries = 3;
-        private const int ScreenshotRetryFrameDelay = 5;
+        private const int ScreenshotRetryFrameDelay = 5;        
 
         static unsafe ScreenshotService()
         {
         }
 
-        public static unsafe void TakeScreenshot()
+        // The callback receives the full path of the screenshot.
+        public static unsafe void TakeScreenshot(Action<string> callback)
         {
             InputFaker.PressScreenshotKey();
-            Plugin.Framework.RunOnTick(() => HandleOrRetryScreenshot(0), delayTicks: ScreenshotRetryFrameDelay);
+            Plugin.Framework.RunOnTick(() => HandleOrRetryScreenshot(0, callback), delayTicks: ScreenshotRetryFrameDelay);
         }
 
-        private static unsafe Task HandleOrRetryScreenshot(int retryCounter)
+        private static unsafe Task HandleOrRetryScreenshot(int retryCounter, Action<string> callback)
         {
             if (retryCounter == ScreenshotRetries)
             {
@@ -59,11 +61,14 @@ namespace Polaroid.Services.Image
                 .FirstOrDefault();
             if (fullPath == null)
             {
-                HandleOrRetryScreenshot(retryCounter++);
+                HandleOrRetryScreenshot(retryCounter++, callback);
             }
             else
             {
+                fullPath = fullPath.Replace( "/", "\\");
+                LastScreenshotPath = fullPath;
                 Plugin.Log.Info("Retrieved path: " + fullPath);
+                callback(fullPath);
             }
 
             return Task.CompletedTask;

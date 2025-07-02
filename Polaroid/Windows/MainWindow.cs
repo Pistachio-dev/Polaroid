@@ -1,4 +1,6 @@
 using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Interface.Textures;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -14,15 +16,18 @@ using Polaroid.Services.Camera;
 using Polaroid.Services.Image;
 using Polaroid.Windows.Widgets;
 using System;
+using System.ComponentModel.Design;
 using System.Numerics;
 
 namespace Polaroid.Windows;
 
 public unsafe class MainWindow : Window, IDisposable
 {
-    private string GoatImagePath;
     private Plugin Plugin;
     private CameraControlUI cameraControlUI;
+    IDalamudTextureWrap? lastScreenshot = null;
+    bool loadingScreenshot = false;
+    
 
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
@@ -36,12 +41,19 @@ public unsafe class MainWindow : Window, IDisposable
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
-        GoatImagePath = goatImagePath;
         Plugin = plugin;
         cameraControlUI= new CameraControlUI();
     }
 
     public void Dispose() { }
+
+    private void UpdateLastScreenshot(string fullPath)
+    {
+        //Plugin.Log.Info("Updating screenshot on main window");
+        //Plugin.Log.Info("FullPath: " + fullPath);
+        //lastScreenshot = Plugin.TextureProvider.GetFromFileAbsolute(fullPath).GetWrapOrDefault();
+        //Plugin.Log.Info($"Loaded: {lastScreenshot?.Size.X}x{lastScreenshot?.Size.Y}");
+    }
 
     public override void Draw()
     {
@@ -61,7 +73,34 @@ public unsafe class MainWindow : Window, IDisposable
                 }
                 if (ImGui.Button("Take screenshot"))
                 {
-                    ScreenshotService.TakeScreenshot();
+                    ScreenshotService.TakeScreenshot(UpdateLastScreenshot);
+                }
+                using (var screenshotContainer = ImRaii.Child("ScreenshotContainer", Vector2.Zero, false))
+                {
+                    if (screenshotContainer.Success)
+                    {
+                        if (ScreenshotService.LastScreenshotPath != null){
+
+                            ImGui.TextUnformatted("Image goes here");
+
+                            //Using a literal path for the same picture, it loads with no issues
+                            var screenshot = Plugin.TextureProvider
+                                .GetFromFile(@"<full route>\FINAL FANTASY XIV - A Realm Reborn\screenshots\ffxiv_10012025_204246_739.png")
+                                .GetWrapOrDefault();
+
+                            // But using the generated path, it only loads if I close and open the window. The paths are identical
+                            screenshot = Plugin.TextureProvider.GetFromFile(ScreenshotService.LastScreenshotPath).GetWrapOrDefault();
+                            
+                            if (screenshot != null)
+                            {
+                                ImGui.Image(screenshot.ImGuiHandle, new Vector2(screenshot.Width, screenshot.Height));
+                            }
+                        }
+                        else
+                        {
+                            ImGui.TextUnformatted("No screenshot detected yet");
+                        }
+                    }
                 }
                 ImGui.EndTabItem();
             }
