@@ -1,16 +1,20 @@
-using System;
-using System.Numerics;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
+using InputInjection;
 using Lumina.Excel.Sheets;
 using Polaroid;
 using Polaroid.Services;
 using Polaroid.Services.Camera;
+using Polaroid.Services.Image;
 using Polaroid.Windows.Widgets;
+using System;
+using System.Numerics;
 
 namespace Polaroid.Windows;
 
@@ -49,10 +53,31 @@ public unsafe class MainWindow : Window, IDisposable
             CameraControl.LogPositionForPlayerAndTarget();
         }
         if (ImGui.BeginTabBar("Main tooling tabs", ImGuiTabBarFlags.None)){
+            if (ImGui.BeginTabItem("Image"))
+            {
+                if (ImGui.Button("Hide HUD"))
+                {
+                    InputFaker.PressHideHudKey();
+                }
+                if (ImGui.Button("Take screenshot"))
+                {
+                    ScreenshotService.TakeScreenshot();
+                }
+                ImGui.EndTabItem();
+            }
             if (ImGui.BeginTabItem("Camera"))
             {
-                if (ImGui.Button("Enable code movable"))
+                if (ImGui.Button("Race check"))
                 {
+                    var race= Plugin.ClientState.LocalPlayer.Customize[(int)CustomizeIndex.Race];
+                    Plugin.Log.Info($"Race: {race}");
+                    var tribe = Plugin.ClientState.LocalPlayer.Customize[(int)CustomizeIndex.Tribe];
+                    Plugin.Log.Info($"Tribe: {tribe}");
+                    var gender = Plugin.ClientState.LocalPlayer.Customize[(int)CustomizeIndex.Gender];
+                    Plugin.Log.Info($"Gender: {gender}");
+                }
+                if (ImGui.Button("Enable code movable"))
+                {                   
                     CameraControl.EnableCodeMovable();
                 }
 

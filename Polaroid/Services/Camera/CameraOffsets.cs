@@ -1,3 +1,6 @@
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +12,12 @@ namespace Polaroid.Services.Camera
 {
     public static class CameraOffsets
     {
+        public static Vector2 GetOffset(IPlayerCharacter character)
+        {
+            var race = character.Customize[(int)CustomizeIndex.Race];
+            throw new NotImplementedException();
+
+        }
         public static readonly Dictionary<string, Vector2> Offsets = new Dictionary<string, Vector2>()
         {
             {"Midlander_Male", new Vector2(-0.48007202f, -1.480011f) },

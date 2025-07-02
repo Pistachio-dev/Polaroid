@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cammy\Cammy.csproj" />
+    <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
     <ProjectReference Include="..\xivFaderPlugin\FaderPlugin\faderPlugin.csproj" />
   </ItemGroup>
 </Project>
