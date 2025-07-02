@@ -15,6 +15,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -29,7 +30,7 @@ namespace Polaroid.Services.Image
     public unsafe static class ScreenshotService // TODO: Make it inherit IDisposable
     {
         private const int ScreenshotRetries = 3;
-        private const int ScreenshotRetryFrameDelay = 1;
+        private const int ScreenshotRetryFrameDelay = 5;
 
         static unsafe ScreenshotService()
         {
@@ -48,12 +49,22 @@ namespace Polaroid.Services.Image
                 Plugin.Log.Warning("Screenshot retrieval failed!");
                 return Task.CompletedTask;
             }
-            retryCounter++;
             string screenshotRoute = ScreenShot.Instance()->ThreadPtr->ScreenShotStorageDirectory.ToString();
             long timeStamp = ScreenShot.Instance()->ScreenShotTimestamp;
             string fileName = GetScreenshotFileName(timeStamp);
             Log.Information($"Looking for screenshot with timestamp {timeStamp} at {screenshotRoute}");
             Log.Information($"Expected file name: \"{fileName}\"");
+            string? fullPath = Directory.EnumerateFiles(screenshotRoute, fileName,
+                new EnumerationOptions() { MaxRecursionDepth = 0, MatchCasing = MatchCasing.CaseInsensitive, RecurseSubdirectories = false })
+                .FirstOrDefault();
+            if (fullPath == null)
+            {
+                HandleOrRetryScreenshot(retryCounter++);
+            }
+            else
+            {
+                Plugin.Log.Info("Retrieved path: " + fullPath);
+            }
 
             return Task.CompletedTask;
         }
