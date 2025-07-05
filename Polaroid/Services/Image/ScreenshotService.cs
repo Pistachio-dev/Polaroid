@@ -1,29 +1,16 @@
-using Dalamud.Hooking;
-using Dalamud.Plugin.Services;
-using Dalamud.Utility.Signatures;
-using ECommons;
-using ECommons.DalamudServices;
-using ECommons.Hooks.ActionEffectTypes;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using Dalamud.Game.ClientState.JobGauge.Enums;
 using FFXIVClientStructs.FFXIV.Client.System.Photo;
-using FFXIVClientStructs.STD.Helper;
-using ImGuizmoNET;
 using InputInjection;
 using Serilog;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
-using static FFXIVClientStructs.FFXIV.Client.Game.Character.ActionEffectHandler;
+using ImageSharpImage = SixLabors.ImageSharp.Image;
 
 namespace Polaroid.Services.Image
 {
@@ -71,6 +58,26 @@ namespace Polaroid.Services.Image
             }
 
             return Task.CompletedTask;
+        }
+
+        public static void ConvertToPolaroidLook(string screenshotDir, string fileName)
+        {
+            string screenshotPath = Path.Combine(screenshotDir, fileName);
+            using ImageSharpImage img = ImageSharpImage.Load<Rgba32>(screenshotPath);
+            Console.WriteLine($"Loaded picture with dimensions {img.Width} {img.Height}");
+
+            // crop
+            int cropRectangleStart = (img.Width - img.Height) / 2;
+            Rectangle cropRectangle = new Rectangle(new Point(cropRectangleStart, 0), new Size(img.Height, img.Height));
+            int borderWidth = img.Height / 20;
+            int dimensionsWithBorder = img.Height + borderWidth;
+
+            using (Image<Rgba32> dest = (Image<Rgba32>)img.Clone(x => x.Crop(cropRectangle).Pad(dimensionsWithBorder, dimensionsWithBorder, Color.White)))
+            {
+                string resultGuid = Guid.NewGuid().ToString();
+                dest.Save(Path.Combine(screenshotDir, $"{resultGuid}.png"));
+            }
+            
         }
 
         private static string GetScreenshotFileName(long timestamp)

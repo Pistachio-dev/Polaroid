@@ -66,6 +66,10 @@ public unsafe class MainWindow : Window, IDisposable
         if (ImGui.BeginTabBar("Main tooling tabs", ImGuiTabBarFlags.None)){
             if (ImGui.BeginTabItem("Image"))
             {
+                if (ImGui.Button("Convert screenshot to polaroid format"))
+                {
+                    ScreenshotService.ConvertToPolaroidLook(@"E:\Program Files (x86)\Steam\steamapps\common\FINAL FANTASY XIV Online\game\screenshots", "ffxiv_dx11 2025-07-04 18-12-02.png");
+                }
                 if (ImGui.Button("Hide HUD"))
                 {
                     InputFaker.PressHideHudKey();
