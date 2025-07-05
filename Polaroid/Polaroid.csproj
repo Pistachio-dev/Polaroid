@@ -23,6 +23,13 @@
   <ItemGroup>
     <ProjectReference Include="..\Cammy\Cammy.csproj" />
     <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+    <ProjectReference Include="..\PngToTexConverter\Penumbra\Penumbra.csproj" />
     <ProjectReference Include="..\xivFaderPlugin\FaderPlugin\faderPlugin.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="OtterTex">
+      <HintPath>..\PngToTexConverter\Penumbra\lib\OtterTex.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

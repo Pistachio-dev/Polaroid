@@ -1,6 +1,7 @@
 using Dalamud.Game.ClientState.JobGauge.Enums;
 using FFXIVClientStructs.FFXIV.Client.System.Photo;
 using InputInjection;
+using Penumbra.Import.Textures;
 using Serilog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -75,7 +76,16 @@ namespace Polaroid.Services.Image
             using (Image<Rgba32> dest = (Image<Rgba32>)img.Clone(x => x.Crop(cropRectangle).Pad(dimensionsWithBorder, dimensionsWithBorder, Color.White)))
             {
                 string resultGuid = Guid.NewGuid().ToString();
-                dest.Save(Path.Combine(screenshotDir, $"{resultGuid}.png"));
+                string pathSquare = Path.Combine(screenshotDir, $"{resultGuid}.png");
+                dest.Save(pathSquare);
+
+                string resultGuid2 = Guid.NewGuid().ToString();
+                string texPath = Path.Combine(screenshotDir, $"{resultGuid2}.tex");
+                BaseImage baseImage = new BaseImage(dest);
+                var tm = new TextureManager(Plugin.DataManager, new OtterGui.Log.Logger(), Plugin.TextureProvider, Plugin.PluginInterface.UiBuilder);
+                //(byte[] rgba, int width, int height) = baseImage.GetPixelData();
+                tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, pathSquare, texPath).Wait();
+                //tm.SavePng(baseImage, texPath, rgba, width, height).Wait();
             }
             
         }
