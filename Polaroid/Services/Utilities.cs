@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Polaroid.Services
 {
@@ -24,6 +25,24 @@ namespace Polaroid.Services
             
             Plugin.Log.Info($"{go.Name} P:{go.Position} R:{go.Rotation} H:{go.GetHeight()}" +
                 $"\nHbR:{go.HitboxRadius} Sex:{go.GetSex()} Kind: {go.ObjectKind.ToString()} Subkind:{go.SubKind}");
+        }
+
+        public static bool IsFileInUse(string fullRoute)
+        {
+            FileInfo fi = new FileInfo(fullRoute);
+            try
+            {
+                using(FileStream stream = fi.Open(FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    stream.Close();
+                }
+            }
+            catch (IOException)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

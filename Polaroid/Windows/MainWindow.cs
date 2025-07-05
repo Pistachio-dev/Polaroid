@@ -25,8 +25,7 @@ public unsafe class MainWindow : Window, IDisposable
 {
     private Plugin Plugin;
     private CameraControlUI cameraControlUI;
-    IDalamudTextureWrap? lastScreenshot = null;
-    bool loadingScreenshot = false;
+    bool screenShotAvailable = false;
     
 
     // We give this window a hidden ID using ##
@@ -83,17 +82,15 @@ public unsafe class MainWindow : Window, IDisposable
 
                             ImGui.TextUnformatted("Image goes here");
 
-                            //Using a literal path for the same picture, it loads with no issues
-                            var screenshot = Plugin.TextureProvider
-                                .GetFromFile(@"<full route>\FINAL FANTASY XIV - A Realm Reborn\screenshots\ffxiv_10012025_204246_739.png")
-                                .GetWrapOrDefault();
-
-                            // But using the generated path, it only loads if I close and open the window. The paths are identical
-                            screenshot = Plugin.TextureProvider.GetFromFile(ScreenshotService.LastScreenshotPath).GetWrapOrDefault();
-                            
-                            if (screenshot != null)
+                            if (screenShotAvailable || !Utilities.IsFileInUse(ScreenshotService.LastScreenshotPath))
                             {
-                                ImGui.Image(screenshot.ImGuiHandle, new Vector2(screenshot.Width, screenshot.Height));
+                                screenShotAvailable = true;
+                                IDalamudTextureWrap? screenshot = Plugin.TextureProvider.GetFromFile(ScreenshotService.LastScreenshotPath)
+                                    .GetWrapOrDefault();
+                                if (screenshot != null)
+                                {
+                                    ImGui.Image(screenshot.ImGuiHandle, new Vector2(300, 300));
+                                }
                             }
                         }
                         else

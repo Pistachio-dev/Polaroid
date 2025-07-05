@@ -64,11 +64,10 @@ namespace Polaroid.Services.Image
                 HandleOrRetryScreenshot(retryCounter++, callback);
             }
             else
-            {
+            {                
                 fullPath = fullPath.Replace( "/", "\\");
                 LastScreenshotPath = fullPath;
-                Plugin.Log.Info("Retrieved path: " + fullPath);
-                callback(fullPath);
+                Plugin.Log.Info("Retrieved path: " + fullPath);         
             }
 
             return Task.CompletedTask;
