@@ -7,3 +7,6 @@
 [submodule "ECommons"]
 	path = ECommons
 	url = https://github.com/NightmareXIV/ECommons.git
+[submodule "PngToTexConverter"]
+	path = PngToTexConverter
+	url = https://github.com/Pistachio-dev/PngToTexConverter.git
