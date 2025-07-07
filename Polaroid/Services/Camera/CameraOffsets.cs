@@ -26,7 +26,14 @@ namespace Polaroid.Services.Camera
             var tribe = targetChar.Customize[(int)CustomizeIndex.Tribe];
             var gender = targetChar.Customize[(int)CustomizeIndex.Gender];
             Plugin.Log.Info($"{targetChar.Name}: Race: {race} Tribe: {tribe} Gender: {gender}");
+        }
 
+        public static Vector3 ApplyOffset(IPlayerCharacter player, Vector2 offset)
+        {
+            var xOffset = (float)Math.Sin(player.Rotation) * offset.X;
+            var zOffset = (float)Math.Cos(player.Rotation) * offset.X;
+            
+            return new Vector3(player.Position.X - xOffset, player.Position.Y - offset.Y, player.Position.Z - zOffset);
         }
 
         public static Vector2 GetCameraOffset(ICharacter character)
