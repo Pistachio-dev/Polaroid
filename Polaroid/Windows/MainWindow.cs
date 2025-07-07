@@ -1,22 +1,16 @@
 using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Interface.Textures;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface.Textures.TextureWraps;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using InputInjection;
-using Lumina.Excel.Sheets;
-using Polaroid;
 using Polaroid.Services;
 using Polaroid.Services.Camera;
 using Polaroid.Services.Image;
 using Polaroid.Windows.Widgets;
 using System;
-using System.ComponentModel.Design;
 using System.Numerics;
 
 namespace Polaroid.Windows;
@@ -68,7 +62,7 @@ public unsafe class MainWindow : Window, IDisposable
             {
                 if (ImGui.Button("Convert screenshot to polaroid format"))
                 {
-                    ScreenshotService.ConvertToPolaroidLook(@"E:\Program Files (x86)\Steam\steamapps\common\FINAL FANTASY XIV Online\game\screenshots", "ffxiv_dx11 2025-07-04 18-12-02.png");
+                    ScreenshotService.ConvertToPolaroidLook(@"E:\Program Files (x86)\Steam\steamapps\common\FINAL FANTASY XIV Online\game\screenshots", "ffxiv_dx11 2025-06-25 21-10-38.png");
                 }
                 if (ImGui.Button("Hide HUD"))
                 {
@@ -149,6 +143,14 @@ public unsafe class MainWindow : Window, IDisposable
             }
             if (ImGui.BeginTabItem("Scanning"))
             {
+                if (ImGui.Button("Get offsets"))
+                {
+                    CameraOffsets.GetCameraOffset(Plugin.ClientState.LocalPlayer?.TargetObject as ICharacter);
+                }
+                if (ImGui.Button("Log race, tribe, gender"))
+                {
+                    CameraOffsets.LogTargetTribeAndGender();
+                }
                 if (ImGui.Button("Scan target"))
                 {
                     Utilities.DumpGameObject(Plugin.ClientState.LocalPlayer?.TargetObject);

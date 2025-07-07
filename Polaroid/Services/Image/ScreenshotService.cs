@@ -73,7 +73,11 @@ namespace Polaroid.Services.Image
             int borderWidth = img.Height / 20;
             int dimensionsWithBorder = img.Height + borderWidth;
 
-            using (Image<Rgba32> dest = (Image<Rgba32>)img.Clone(x => x.Crop(cropRectangle).Pad(dimensionsWithBorder, dimensionsWithBorder, Color.White)))
+            int resizeSize = dimensionsWithBorder >= 1024 ? 1024 : 512;
+            using (Image<Rgba32> dest = (Image<Rgba32>)img.Clone(x =>
+                x.Crop(cropRectangle)
+                .Pad(dimensionsWithBorder, dimensionsWithBorder, Color.White)
+                .Resize(new Size(resizeSize, resizeSize))))
             {
                 string resultGuid = Guid.NewGuid().ToString();
                 string pathSquare = Path.Combine(screenshotDir, $"{resultGuid}.png");

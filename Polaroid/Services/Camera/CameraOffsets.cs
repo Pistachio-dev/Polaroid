@@ -1,5 +1,6 @@
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,63 @@ namespace Polaroid.Services.Camera
 {
     public static class CameraOffsets
     {
-        public static Vector2 GetOffset(IPlayerCharacter character)
+        public static void LogTargetTribeAndGender()
         {
-            var race = character.Customize[(int)CustomizeIndex.Race];
-            throw new NotImplementedException();
+            if (Plugin.ClientState.LocalPlayer == null
+                || Plugin.ClientState.LocalPlayer.TargetObject == null
+                || !(Plugin.ClientState.LocalPlayer.TargetObject is ICharacter targetChar))
+            {
+                Plugin.ChatGui.PrintError("Current target is not a character");
+                return;
+            }
+            var race = targetChar.Customize[(int)CustomizeIndex.Race];
+            var tribe = targetChar.Customize[(int)CustomizeIndex.Tribe];
+            var gender = targetChar.Customize[(int)CustomizeIndex.Gender];
+            Plugin.Log.Info($"{targetChar.Name}: Race: {race} Tribe: {tribe} Gender: {gender}");
+
+        }
+
+        public static Vector2 GetCameraOffset(ICharacter character)
+        {
+            var tribe = character.Customize[(int)CustomizeIndex.Tribe];
+            var gender = character.Customize[(int)CustomizeIndex.Gender];
+            var key = $"{GetRaceWord(tribe)}_{GetGenderWord(gender)}";
+            Plugin.Log.Debug("Camera offset key: " + key);
+            if (!Offsets.TryGetValue(key, out Vector2 offset))
+            {
+                Plugin.Log.Warning($"Failed to retrieve camera offset for tribe {tribe} and gender {gender}, key {key}");
+                return Offsets["Midlander_Male"];
+            }
+
+            return offset;
+        }
+
+        private static string GetGenderWord(int customizeIndexGender)
+        {
+            return customizeIndexGender == 0 ? "Male" : "Female";
+        }
+        private static string GetRaceWord(int customizeIndexTribe)
+        {
+            switch (customizeIndexTribe)
+            {
+                case 1: return "Midlander";
+                case 2: return "Highlander";
+                case 3:
+                case 4: return "Elezen";
+                case 5:
+                case 6: return "Lalafell";
+                case 7:
+                case 8: return "Miqote";
+                case 9:
+                case 10: return "Roegadyn";
+                case 11:
+                case 12: return "AuRa";
+                case 13:
+                case 14: return "Hrothgar";
+                case 15:
+                case 16: return "Viera";
+                default: return "Midlander";
+            }
 
         }
         public static readonly Dictionary<string, Vector2> Offsets = new Dictionary<string, Vector2>()

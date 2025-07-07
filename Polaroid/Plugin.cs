@@ -23,6 +23,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
     [PluginService] internal static IGameInteropProvider SigScanner { get; private set; } = null!;
+    [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
 
     public UIVisibilityControl UIVisControl { get; }
     public EmoteReaderHooks emoteReader;
