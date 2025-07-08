@@ -146,7 +146,7 @@ public unsafe class MainWindow : Window, IDisposable
             {
                 if (ImGui.Button("Get current slot folder"))
                 {
-                    PenumbraModManager.GetCurrentSlotPath();
+                    PenumbraModManager.GetCurrentSlot();
                 }
                 if (ImGui.Button("Get offsets"))
                 {
