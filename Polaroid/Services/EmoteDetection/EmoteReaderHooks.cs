@@ -13,6 +13,7 @@ namespace Polaroid.Services.EmoteDetection
     public class EmoteReaderHooks : IDisposable
     {
         public const int PhotographEmoteId = 288;
+        public const int U_PhotograhEmoteId = 290;
         public const int PhotographScreenshotDealyMs = 100;//6280;
 
         public const int VisageEmoteId = 286;
@@ -48,7 +49,6 @@ namespace Polaroid.Services.EmoteDetection
         void OnEmoteDetour(ulong unk, ulong instigatorAddr, ushort emoteId, ulong targetId, ulong unk2)
         {
             TakePictureIfConditionsMet(instigatorAddr, emoteId, targetId);
-
             hookEmote?.Original(unk, instigatorAddr, emoteId, targetId, unk2);
         }
 
@@ -68,7 +68,7 @@ namespace Polaroid.Services.EmoteDetection
             }
 
             Plugin.Log.Warning($"Emote detected with id: {emoteId}");
-            if (emoteId == PhotographEmoteId)
+            if (emoteId == PhotographEmoteId || emoteId == U_PhotograhEmoteId)
             {
                 Orchestrator.OnPhotographEmote(Plugin.ClientState.LocalPlayer!);
             }            
