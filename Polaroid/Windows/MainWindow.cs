@@ -9,6 +9,7 @@ using InputInjection;
 using Polaroid.Services;
 using Polaroid.Services.Camera;
 using Polaroid.Services.Image;
+using Polaroid.Services.Penumbra;
 using Polaroid.Windows.Widgets;
 using System;
 using System.Numerics;
@@ -143,6 +144,10 @@ public unsafe class MainWindow : Window, IDisposable
             }
             if (ImGui.BeginTabItem("Scanning"))
             {
+                if (ImGui.Button("Get current slot folder"))
+                {
+                    PenumbraModManager.GetCurrentSlotPath();
+                }
                 if (ImGui.Button("Get offsets"))
                 {
                     CameraOffsets.GetCameraOffset(Plugin.ClientState.LocalPlayer?.TargetObject as ICharacter);
