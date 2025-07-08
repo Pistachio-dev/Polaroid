@@ -18,6 +18,11 @@ namespace Polaroid.Services.Camera
 
         public static void Draw(IPlayerCharacter pc)
         {
+            if (Plugin.ClientState.LocalPlayer != null)
+            {
+                Position = GetCameraTheoreticalPosition(Plugin.ClientState.LocalPlayer);
+            }
+
             ImGui.DragFloat3("Position", ref Position, 0.01f);
             ImGui.DragFloat("Dot size", ref DotSize, 0.1f);
             ImGui.TextUnformatted($"Character rot: {pc.Rotation * 180f /Math.PI}");
@@ -35,6 +40,7 @@ namespace Polaroid.Services.Camera
         public static void StraightenCharacter(IPlayerCharacter pc)
         {
         }
+
         public static void MoveDot(Vector3 newPosition)
         {
             Position = newPosition;
@@ -59,6 +65,14 @@ namespace Polaroid.Services.Camera
             ImGui.GetBackgroundDrawList().AddCircleFilled(screenPos, DotSize, Red);
 
             ImGui.GetBackgroundDrawList().PopClipRect();
+        }
+
+        private static Vector3 GetCameraTheoreticalPosition(IPlayerCharacter pc)
+        {
+            var offset = CameraOffsets.GetCameraOffset(pc);
+            var position = CameraOffsets.ApplyOffset(pc, offset);
+
+            return position;
         }
     }
 }

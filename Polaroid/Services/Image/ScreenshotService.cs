@@ -1,4 +1,6 @@
 using Dalamud.Game.ClientState.JobGauge.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using EmbedIO.Utilities;
 using FFXIVClientStructs.FFXIV.Client.System.Photo;
 using InputInjection;
 using Penumbra.Import.Textures;
@@ -9,6 +11,7 @@ using SixLabors.ImageSharp.Processing;
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using ImageSharpImage = SixLabors.ImageSharp.Image;
@@ -18,6 +21,7 @@ namespace Polaroid.Services.Image
     public unsafe static class ScreenshotService // TODO: Make it inherit IDisposable
     {
         public static string? LastScreenshotPath = null;
+        public static DateTime LastScreenshotDate => UnixTimeStampToLocalDateTime(ScreenShot.Instance()->ScreenShotTimestamp);
         private const int ScreenshotRetries = 3;
         private const int ScreenshotRetryFrameDelay = 5;        
 
@@ -26,40 +30,47 @@ namespace Polaroid.Services.Image
         }
 
         // The callback receives the full path of the screenshot.
-        public static unsafe void TakeScreenshot(Action<string> callback)
+        public static unsafe void TakeScreenshot(Action callback)
         {
             InputFaker.PressScreenshotKey();
-            Plugin.Framework.RunOnTick(() => HandleOrRetryScreenshot(0, callback), delayTicks: ScreenshotRetryFrameDelay);
+            Plugin.Framework.RunOnTick(() => TakeScreenshotWithRetry(callback), delayTicks: ScreenshotRetryFrameDelay);
         }
 
-        private static unsafe Task HandleOrRetryScreenshot(int retryCounter, Action<string> callback)
+        private static unsafe void TakeScreenshotWithRetry(Action callback, int retryCounter = 0)
         {
-            if (retryCounter == ScreenshotRetries)
+            InputFaker.PressScreenshotKey();
+            if (retryCounter >= ScreenshotRetries)
             {
                 Plugin.Log.Warning("Screenshot retrieval failed!");
-                return Task.CompletedTask;
             }
+
             string screenshotRoute = ScreenShot.Instance()->ThreadPtr->ScreenShotStorageDirectory.ToString();
             long timeStamp = ScreenShot.Instance()->ScreenShotTimestamp;
-            string fileName = GetScreenshotFileName(timeStamp);
-            Log.Information($"Looking for screenshot with timestamp {timeStamp} at {screenshotRoute}");
-            Log.Information($"Expected file name: \"{fileName}\"");
+            DateTime scTime = UnixTimeStampToLocalDateTime(timeStamp);
+            if (DateTime.Now - scTime > TimeSpan.FromSeconds(10))
+            {
+                Log.Verbose("Screenshot not yet taken. Timestamp is old.");
+                TakeScreenshotWithRetry(callback, retryCounter++);
+            }
+
+            string fileName = GetScreenshotFileName(scTime);
             string? fullPath = Directory.EnumerateFiles(screenshotRoute, fileName,
                 new EnumerationOptions() { MaxRecursionDepth = 0, MatchCasing = MatchCasing.CaseInsensitive, RecurseSubdirectories = false })
                 .FirstOrDefault();
             if (fullPath == null)
             {
-                HandleOrRetryScreenshot(retryCounter++, callback);
+                Log.Verbose($"Screenshot not yet found. Retrying ({retryCounter})");
+                TakeScreenshotWithRetry(callback, retryCounter++);
             }
             else
-            {                
-                fullPath = fullPath.Replace( "/", "\\");
+            {
+                fullPath = fullPath.Replace("/", "\\");
                 LastScreenshotPath = fullPath;
-                Plugin.Log.Info("Retrieved path: " + fullPath);         
+                Plugin.Log.Info("Retrieved path: " + fullPath);
+                callback();
             }
-
-            return Task.CompletedTask;
         }
+
 
         public static void ConvertToPolaroidLook(string screenshotDir, string fileName)
         {
@@ -94,10 +105,9 @@ namespace Polaroid.Services.Image
             
         }
 
-        private static string GetScreenshotFileName(long timestamp)
+        private static string GetScreenshotFileName(DateTime scTime)
         {
             StringBuilder s = new StringBuilder();
-            DateTime scTime = UnixTimeStampToLocalDateTime(timestamp);
             s.Append("ffxiv_");
             s.Append(scTime.Day.ToString("D2"));
             s.Append(scTime.Month.ToString("D2"));

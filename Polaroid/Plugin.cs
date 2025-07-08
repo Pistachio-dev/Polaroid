@@ -21,12 +21,12 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IFramework Framework { get; private set; } = null!;
     [PluginService] internal static ICondition Condition { get; private set; } = null!;
     [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
+    [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
     [PluginService] internal static IGameInteropProvider SigScanner { get; private set; } = null!;
-    [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
 
     public UIVisibilityControl UIVisControl { get; }
-    public EmoteReaderHooks emoteReader;
+    public static EmoteReaderHooks emoteReader;
     public static Cammy.Cammy CammyPlugin { get; private set; }
     private const string CommandName = "/polaroid";
 
@@ -75,29 +75,7 @@ public sealed class Plugin : IDalamudPlugin
     private static Stopwatch PhotoStopwatch = new Stopwatch();
     internal static bool CountTime = false;
     
-    internal static void TimePhoto(IFramework framework)
-    {
-        if (!PhotoStopwatch.IsRunning)
-        {
-            PhotoStopwatch.Start();
-        }
 
-        if (PhotoStopwatch.Elapsed >= TimeSpan.FromSeconds(10))
-        {
-            PhotoStopwatch.Reset();
-            framework.Update -= TimePhoto;
-        }
-
-        if (CountTime)
-        {
-            //Log.Info(PhotoStopwatch.ElapsedMilliseconds.ToString());
-        }
-        else
-        {
-            Log.Info(PhotoStopwatch.ElapsedMilliseconds.ToString());
-            PhotoStopwatch.Reset();            
-        }
-    }
 
     public void Dispose()
     {

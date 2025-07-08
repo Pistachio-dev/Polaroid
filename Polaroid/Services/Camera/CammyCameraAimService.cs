@@ -11,7 +11,6 @@ namespace Polaroid.Services.Camera
 {
     public static class CammyCameraAimService
     {
-
         public static void MoveCamera(Vector3 position, float hRotation, float vRotation)
         {
             if (Plugin.ClientState.LocalPlayer == null)
@@ -21,6 +20,7 @@ namespace Polaroid.Services.Camera
             }
 
             EnableCodeMovable();
+            SetCodeMovableCameraToLocation(position, hRotation, vRotation);
         }
 
         private static unsafe void EnableCodeMovable()

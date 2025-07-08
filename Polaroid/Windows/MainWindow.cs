@@ -68,10 +68,10 @@ public unsafe class MainWindow : Window, IDisposable
                 {
                     InputFaker.PressHideHudKey();
                 }
-                if (ImGui.Button("Take screenshot"))
-                {
-                    ScreenshotService.TakeScreenshot(UpdateLastScreenshot);
-                }
+                //if (ImGui.Button("Take screenshot"))
+                //{
+                //    ScreenshotService.TakeScreenshot(UpdateLastScreenshot);
+                //}
                 using (var screenshotContainer = ImRaii.Child("ScreenshotContainer", Vector2.Zero, false))
                 {
                     if (screenshotContainer.Success)

@@ -13,7 +13,7 @@ namespace Polaroid.Services.EmoteDetection
     public class EmoteReaderHooks : IDisposable
     {
         public const int PhotographEmoteId = 288;
-        public const int PhotographScreenshotDealyMs = 6280;
+        public const int PhotographScreenshotDealyMs = 100;//6280;
 
         public const int VisageEmoteId = 286;
 
@@ -70,10 +70,8 @@ namespace Polaroid.Services.EmoteDetection
             Plugin.Log.Warning($"Emote detected with id: {emoteId}");
             if (emoteId == PhotographEmoteId)
             {
-                Plugin.Framework.Update += Plugin.TimePhoto;
-                Plugin.CountTime = true;
-            }
-            
+                Orchestrator.OnPhotographEmote(Plugin.ClientState.LocalPlayer!);
+            }            
         }
     }
 }
