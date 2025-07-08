@@ -1,6 +1,7 @@
 using Dalamud.Game.ClientState.JobGauge.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using EmbedIO.Utilities;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.System.Photo;
 using InputInjection;
 using Penumbra.Import.Textures;
@@ -22,7 +23,7 @@ namespace Polaroid.Services.Image
     {
         public static string? LastScreenshotPath = null;
         public static DateTime LastScreenshotDate => UnixTimeStampToLocalDateTime(ScreenShot.Instance()->ScreenShotTimestamp);
-        private const int ScreenshotRetries = 3;
+        private const int ScreenshotRetries = 10;
         private const int ScreenshotRetryFrameDelay = 5;        
 
         static unsafe ScreenshotService()
@@ -71,10 +72,18 @@ namespace Polaroid.Services.Image
             }
         }
 
-
-        public static void ConvertToPolaroidLook(string screenshotDir, string fileName)
+        public static void GeneratePhotoTexture()
         {
-            string screenshotPath = Path.Combine(screenshotDir, fileName);
+            WaitUntilScreenshotReadable(() => ConvertToPolaroidLook(), 0);
+        }
+        private static void ConvertToPolaroidLook()
+        {
+            string? screenshotPath = LastScreenshotPath;
+            if (screenshotPath == null)
+            {
+                Log.Error("Screenshot path null when trying to generate texture!");
+                return;
+            }
             using ImageSharpImage img = ImageSharpImage.Load<Rgba32>(screenshotPath);
             Console.WriteLine($"Loaded picture with dimensions {img.Width} {img.Height}");
 
@@ -90,6 +99,7 @@ namespace Polaroid.Services.Image
                 .Pad(dimensionsWithBorder, dimensionsWithBorder, Color.White)
                 .Resize(new Size(resizeSize, resizeSize))))
             {
+                string screenshotDir = Path.GetDirectoryName(screenshotPath) ?? "C:";
                 string resultGuid = Guid.NewGuid().ToString();
                 string pathSquare = Path.Combine(screenshotDir, $"{resultGuid}.png");
                 dest.Save(pathSquare);
@@ -101,8 +111,30 @@ namespace Polaroid.Services.Image
                 //(byte[] rgba, int width, int height) = baseImage.GetPixelData();
                 tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, pathSquare, texPath).Wait();
                 //tm.SavePng(baseImage, texPath, rgba, width, height).Wait();
+            }            
+        }
+
+        private static void WaitUntilScreenshotReadable(Action callback, int retryCounter)
+        {
+            if (LastScreenshotPath == null)
+            {
+                Log.Error("Last screenshot path is not set!");
+                return;
             }
-            
+
+            if (retryCounter >= ScreenshotRetries)
+            {
+                Log.Error("Exceeded retry maximum when trying to convert screenshot to .tex");
+            }
+
+            bool inUse = Utilities.IsFileInUse(LastScreenshotPath);
+            if (!inUse)
+            {
+                callback();
+                return;
+            }
+
+            Plugin.Framework.RunOnTick(() => WaitUntilScreenshotReadable(callback, retryCounter++), delayTicks: ScreenshotRetryFrameDelay);
         }
 
         private static string GetScreenshotFileName(DateTime scTime)

@@ -40,6 +40,7 @@ namespace Polaroid.Services
         {
             InputFaker.PressHideHudKey();
             CammyCameraAimService.DisableCodeMovable();
+            ScreenshotService.GeneratePhotoTexture();
         }
     }
 }
