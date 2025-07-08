@@ -24,10 +24,10 @@ namespace Polaroid.Services
 
         public static void OnPhotographFlash(IPlayerCharacter playerCharacter)
         {
-            //InputFaker.PressHideHudKey();
+            InputFaker.PressHideHudKey();
             Vector2 cameraOffset = CameraOffsets.GetCameraOffset(playerCharacter);
             Vector3 newCameraPosition = CameraOffsets.ApplyOffset(playerCharacter, cameraOffset);
-            //CammyCameraAimService.MoveCamera(newCameraPosition, playerCharacter.Rotation, 0);
+            CammyCameraAimService.MoveCamera(newCameraPosition, (float)(playerCharacter.Rotation + Math.PI), 0);
             Plugin.Framework.RunOnTick(() => OnHiddenHUD(playerCharacter), TimeSpan.FromSeconds(1));
         }
 
@@ -38,8 +38,8 @@ namespace Polaroid.Services
 
         public static void OnScreenshotTaken(IPlayerCharacter playerCharacter)
         {
-            //InputFaker.PressHideHudKey();
-            //CammyCameraAimService.DisableCodeMovable();
+            InputFaker.PressHideHudKey();
+            CammyCameraAimService.DisableCodeMovable();
         }
     }
 }
