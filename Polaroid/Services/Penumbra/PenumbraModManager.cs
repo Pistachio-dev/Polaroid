@@ -1,6 +1,7 @@
 using Dalamud.Game.Network.Structures;
 using ECommons.Reflection;
 using FFXIVClientStructs;
+using Newtonsoft.Json.Linq;
 using Polaroid.Services.Penumbra.Model;
 using Serilog;
 using Swan.Formatters;
@@ -11,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Polaroid.Services.Penumbra
@@ -18,44 +20,51 @@ namespace Polaroid.Services.Penumbra
     // Manages the mod that lets you show the last picture
     internal static class PenumbraModManager
     {
-        private static string ModName = "[Pistachio] Take real photos";
-        private static string SlotPropertyName = "Slot (please don't touch)";
+        private static string ModName = "Sign Holding [Hum] [Mittens]";
         private static string Penumbra = "Penumbra";
-        private static string TextureFolderPath => Path.Combine(ModName, "vfx", "common", "texture");
-        private static string Extension = ".tex";
+        private static string TextureFolderPath => Path.Combine(ModName, "Sign", "photograph", "vfx");
+        private static string BaseFileName = "photograph_capture_";
+        private static string Extension = ".atex";
+        private static string Group2JsonFileName = "group_002_sign.json";
+        private static Regex RouteMatch = new Regex($"{BaseFileName}([0-9])+\\.atex");
 
-
-        public static string CleanOldFilesAndPrepareNextTexturePath()
+        public static string GetModRootPath()
         {
-            int currentSlot = GetCurrentSlot();
-            var nextTextureRoute = GetTextureFullPath(GetNextSlot(currentSlot));
-            if (File.Exists(nextTextureRoute))
-            {
-                Log.Information("Deleting old texture at " + nextTextureRoute);
-                File.Delete(nextTextureRoute);
-            }
-
-            int newSlot = AdvanceCurrentSlot();
-            Log.Information("Slot moved to " + newSlot);
-            return GetTextureFullPath(newSlot);
+            return Path.Combine(GetPenumbraModFolder(), ModName);
         }
-
         public static string GetTextureFolder()
         {
             return Path.Combine(GetPenumbraModFolder(), TextureFolderPath);
         }
 
-        private static string GetTextureFileName(int slot)
+        public static string GetNewTextureFullPath()
         {
-            return $"flag_f{slot}{Extension}";
+            var fileName = GetNextFileName();
+            return Path.Combine(GetTextureFolder(), GetNextFileName());
         }
 
-        private static int GetNextSlot(int slot)
+        private static string GetTextureFileName(int number)
         {
-            return (slot + 1) % 20;
+            return $"{BaseFileName}{number}{Extension}";
         }
 
+        private static string GetNextFileName()
+        {
+            var lastTextureFileName = Directory.EnumerateFiles(GetTextureFolder()).Order().LastOrDefault();
+            Plugin.Log.Info("Last file name: " + lastTextureFileName);
+            if (lastTextureFileName == null)
+            {
+                return GetTextureFileName(0);
+            }
 
+            var match = RouteMatch.Match(lastTextureFileName);
+            if (match.Groups.Count < 2 || !int.TryParse(match.Groups[1].Value, out int number))
+            {
+                throw new Exception($"Could not find a file matching the pattern in folder {GetTextureFolder()}");
+            }
+
+            return GetTextureFileName(number + 1);
+        }
 
         private static string GetTextureFullPath(int slot)
         {
@@ -79,44 +88,50 @@ namespace Polaroid.Services.Penumbra
             return penumbraModFilesPath;
         }
 
-        private static int GetCurrentSlot()
+        public static void ModifyPhotographFileRoute()
         {
-            string modConfigPath = GetModConfigFilePath();
-            string modConfigJsonText = File.ReadAllText(modConfigPath);
-            ModConfigFileRoot modConfigFile = Json.Deserialize<ModConfigFileRoot>(modConfigJsonText);
-            int currentSlot = (int)modConfigFile.Settings[ModName].Settings[SlotPropertyName];
-
-            return currentSlot;
-        }
-        private static string GetModConfigFilePath()
-        {
-            string rootPath = GetAllPluginConfigFolder();
-            // Step one: get the active collection
-            var active_collections_path = Path.Combine(rootPath, Penumbra, "active_collections.json");
-            string jsonText = File.ReadAllText(active_collections_path);
-            JsonDocument activeColDocument = JsonDocument.Parse(jsonText);
-            string currentColId = activeColDocument.RootElement.GetProperty("Current").GetString() ?? "Could not access current collection. There should be at least the default one?";
-            var modConfigPath = Path.Combine(rootPath, Penumbra, "collections", $"{currentColId}.json");
-
-            return modConfigPath;
+            var path = Path.Combine(GetModRootPath(), Group2JsonFileName);
+            if (!File.Exists(path)) throw new Exception("Mod json file not found. Is it not installed?");
+            string jsonFile = File.ReadAllText(path);
+            var match = RouteMatch.Match(jsonFile);
+            string oldFileName = match.Groups[0].Value;
+            string newFileName = GetNextFileName();
+            Plugin.Log.Info("Old file in config: " + oldFileName);
+            Plugin.Log.Info("New file in config: " + newFileName);
+                
+            jsonFile = jsonFile.Replace(oldFileName, newFileName);
+            File.WriteAllText(path, jsonFile);
         }
 
+        //private static string GetModConfigFilePath()
+        //{
+        //    string rootPath = GetAllPluginConfigFolder();
+        //    // Step one: get the active collection
+        //    var active_collections_path = Path.Combine(rootPath, Penumbra, "active_collections.json");
+        //    string jsonText = File.ReadAllText(active_collections_path);
+        //    JsonDocument activeColDocument = JsonDocument.Parse(jsonText);
+        //    string currentColId = activeColDocument.RootElement.GetProperty("Current").GetString() ?? "Could not access current collection. There should be at least the default one?";
+        //    var modConfigPath = Path.Combine(rootPath, Penumbra, "collections", $"{currentColId}.json");
 
-        public static int AdvanceCurrentSlot()
-        {
-            string modConfigPath = GetModConfigFilePath();
-            string modConfigJsonText = File.ReadAllText(modConfigPath);
-            ModConfigFileRoot modConfigFile = Newtonsoft.Json.JsonConvert.DeserializeObject<ModConfigFileRoot>(modConfigJsonText);
-            long currentSlot = (long)modConfigFile.Settings[ModName].Settings[SlotPropertyName];
-            int newSlot = GetNextSlot((int)currentSlot);
-            modConfigFile.Settings[ModName].Settings[SlotPropertyName] = newSlot;
-            var serialized = Newtonsoft.Json.JsonConvert.SerializeObject(modConfigFile);
-            File.WriteAllText(modConfigPath, serialized);
+        //    return modConfigPath;
+        //}
 
-            Plugin.Log.Info("New slot: " + newSlot);
 
-            return (int)newSlot;
-        }
+        //public static int AdvanceCurrentSlot()
+        //{
+        //    string modConfigPath = GetModConfigFilePath();
+        //    string modConfigJsonText = File.ReadAllText(modConfigPath);
+        //    ModConfigFileRoot modConfigFile = Newtonsoft.Json.JsonConvert.DeserializeObject<ModConfigFileRoot>(modConfigJsonText);
+        //    long currentSlot = (long)modConfigFile.Settings[ModName].Settings[SlotPropertyName];
+        //    int newSlot = GetNextSlot((int)currentSlot);
+        //    modConfigFile.Settings[ModName].Settings[SlotPropertyName] = newSlot;
+        //    var serialized = Newtonsoft.Json.JsonConvert.SerializeObject(modConfigFile);
+        //    File.WriteAllText(modConfigPath, serialized);
+
+        //    Plugin.Log.Info("New slot: " + newSlot);
+
+        //    return (int)newSlot;
+        //}
 
         private static string GetAllPluginConfigFolder()
         {

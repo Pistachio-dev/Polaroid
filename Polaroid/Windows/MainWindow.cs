@@ -144,10 +144,6 @@ public unsafe class MainWindow : Window, IDisposable
             }
             if (ImGui.BeginTabItem("Scanning"))
             {
-                if (ImGui.Button("Get current slot folder"))
-                {
-                    PenumbraModManager.AdvanceCurrentSlot();
-                }
                 if (ImGui.Button("Get offsets"))
                 {
                     CameraOffsets.GetCameraOffset(Plugin.ClientState.LocalPlayer?.TargetObject as ICharacter);

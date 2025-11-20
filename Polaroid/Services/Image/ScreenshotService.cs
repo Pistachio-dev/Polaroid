@@ -102,18 +102,19 @@ namespace Polaroid.Services.Image
             {
                 string textureFolderDir = PenumbraModManager.GetTextureFolder();
                 string polaroidFormatScreenshotFileName = Path.GetFileNameWithoutExtension(LastScreenshotPath) + ".png";
+                Directory.CreateDirectory(Path.Combine(textureFolderDir, "Photos"));
                 string pathSquarePhoto = Path.Combine(textureFolderDir, "Photos", polaroidFormatScreenshotFileName);
                 Plugin.Log.Info("Square photo path: " + pathSquarePhoto);
                 dest.Save(pathSquarePhoto);
-                string texturePath = PenumbraModManager.CleanOldFilesAndPrepareNextTexturePath();
-
-                Plugin.Log.Info(texturePath);
+                string newTexturePath = PenumbraModManager.GetNewTextureFullPath();
+                PenumbraModManager.ModifyPhotographFileRoute();
+                Plugin.Log.Info(newTexturePath);
                 //string resultGuid2 = Guid.NewGuid().ToString();
                 //string texPath = Path.Combine(screenshotDir, $"{resultGuid2}.tex");
                 BaseImage baseImage = new BaseImage(dest);
                 var tm = new TextureManager(Plugin.DataManager, new OtterGui.Log.Logger(), Plugin.TextureProvider, Plugin.PluginInterface.UiBuilder);
                 //(byte[] rgba, int width, int height) = baseImage.GetPixelData();
-                tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, pathSquarePhoto, texturePath).Wait();
+                tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, pathSquarePhoto, newTexturePath).Wait();
                 //tm.SavePng(baseImage, texPath, rgba, width, height).Wait();
             }            
         }
