@@ -7,11 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Polaroid", "Polaroid\Polaro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "faderPlugin", "xivFaderPlugin\FaderPlugin\faderPlugin.csproj", "{B88ECFF0-4806-B580-D00D-F22D8DE59497}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cammy", "Cammy\Cammy.csproj", "{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Penumbra", "PngToTexConverter\Penumbra\Penumbra.csproj", "{5A2FE61E-6E47-13FE-F576-A0282B560587}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECommons", "ECommons\ECommons\ECommons.csproj", "{0B1F2C54-98D7-DBB6-6CDF-C71EE0173954}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Penumbra", "PngToTexConverter\Penumbra\Penumbra.csproj", "{5A2FE61E-6E47-13FE-F576-A0282B560587}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cammy", "Cammy\Cammy.csproj", "{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,18 +27,18 @@ Global
 		{B88ECFF0-4806-B580-D00D-F22D8DE59497}.Debug|x64.Build.0 = Debug|x64
 		{B88ECFF0-4806-B580-D00D-F22D8DE59497}.Release|x64.ActiveCfg = Release|x64
 		{B88ECFF0-4806-B580-D00D-F22D8DE59497}.Release|x64.Build.0 = Release|x64
-		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Debug|x64.ActiveCfg = Debug|x64
-		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Debug|x64.Build.0 = Debug|x64
-		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Release|x64.ActiveCfg = Release|x64
-		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Release|x64.Build.0 = Release|x64
-		{0B1F2C54-98D7-DBB6-6CDF-C71EE0173954}.Debug|x64.ActiveCfg = Debug|x64
-		{0B1F2C54-98D7-DBB6-6CDF-C71EE0173954}.Debug|x64.Build.0 = Debug|x64
-		{0B1F2C54-98D7-DBB6-6CDF-C71EE0173954}.Release|x64.ActiveCfg = Release|x64
-		{0B1F2C54-98D7-DBB6-6CDF-C71EE0173954}.Release|x64.Build.0 = Release|x64
 		{5A2FE61E-6E47-13FE-F576-A0282B560587}.Debug|x64.ActiveCfg = Debug|x64
 		{5A2FE61E-6E47-13FE-F576-A0282B560587}.Debug|x64.Build.0 = Debug|x64
 		{5A2FE61E-6E47-13FE-F576-A0282B560587}.Release|x64.ActiveCfg = Release|x64
 		{5A2FE61E-6E47-13FE-F576-A0282B560587}.Release|x64.Build.0 = Release|x64
+		{0B1F2C54-98D7-DBB6-6CDF-C71EE0173954}.Debug|x64.ActiveCfg = Debug|x64
+		{0B1F2C54-98D7-DBB6-6CDF-C71EE0173954}.Debug|x64.Build.0 = Debug|x64
+		{0B1F2C54-98D7-DBB6-6CDF-C71EE0173954}.Release|x64.ActiveCfg = Release|x64
+		{0B1F2C54-98D7-DBB6-6CDF-C71EE0173954}.Release|x64.Build.0 = Release|x64
+		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Debug|x64.ActiveCfg = Debug|x64
+		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Debug|x64.Build.0 = Debug|x64
+		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Release|x64.ActiveCfg = Release|x64
+		{AB94BD8A-B481-59C2-0A5D-6A52429DE9CD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,7 +4,6 @@ using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
-using ImGuiNET;
 using InputInjection;
 using Polaroid.Services;
 using Polaroid.Services.Camera;
@@ -13,6 +12,7 @@ using Polaroid.Services.Penumbra;
 using Polaroid.Windows.Widgets;
 using System;
 using System.Numerics;
+using Dalamud.Bindings.ImGui;
 
 namespace Polaroid.Windows;
 
@@ -88,7 +88,7 @@ public unsafe class MainWindow : Window, IDisposable
                                     .GetWrapOrDefault();
                                 if (screenshot != null)
                                 {
-                                    ImGui.Image(screenshot.ImGuiHandle, new Vector2(300, 300));
+                                    ImGui.Image(screenshot.Handle, new Vector2(300, 300));
                                 }
                             }
                         }

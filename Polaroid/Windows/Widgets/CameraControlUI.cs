@@ -1,10 +1,11 @@
-using ImGuiNET;
 using Polaroid.Services.Camera;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dalamud.Bindings.ImGui;
+
 
 namespace Polaroid.Windows.Widgets
 {
