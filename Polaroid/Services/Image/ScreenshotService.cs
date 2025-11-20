@@ -14,6 +14,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using ImageSharpImage = SixLabors.ImageSharp.Image;
@@ -90,14 +91,17 @@ namespace Polaroid.Services.Image
 
             // crop
             int cropRectangleStart = (img.Width - img.Height) / 2;
-            Rectangle cropRectangle = new Rectangle(new Point(cropRectangleStart, 0), new Size(img.Height, img.Height));
+            var ratio = img.Width / img.Height;
             int borderWidth = img.Height / 20;
-            int dimensionsWithBorder = img.Height + borderWidth;
+            Rectangle cropRectangle = new Rectangle(new Point(cropRectangleStart, 0), new Size(img.Width - 2 * cropRectangleStart - borderWidth, img.Height));
+            int heightWithBorder = img.Height + borderWidth;
+            int widthWithBorder = img.Height + borderWidth;
 
-            int resizeSize = dimensionsWithBorder >= 1024 ? 1024 : 512;
+            int resizeSize = heightWithBorder >= 1024 ? 1024 : 512;
             using (Image<Rgba32> dest = (Image<Rgba32>)img.Clone(x =>
-                x.Crop(cropRectangle)
-                .Pad(dimensionsWithBorder, dimensionsWithBorder, Color.White)
+                x
+                .Crop(cropRectangle)
+                //.Pad(widthWithBorder, heightWithBorder, Color.White)
                 .Resize(new Size(resizeSize, resizeSize))))
             {
                 string textureFolderDir = PenumbraModManager.GetTextureFolder();

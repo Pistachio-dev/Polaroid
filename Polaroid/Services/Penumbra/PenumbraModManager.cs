@@ -26,7 +26,7 @@ namespace Polaroid.Services.Penumbra
         private static string BaseFileName = "photograph_capture_";
         private static string Extension = ".atex";
         private static string Group2JsonFileName = "group_002_sign.json";
-        private static Regex RouteMatch = new Regex($"{BaseFileName}([0-9])+\\.atex");
+        private static Regex RouteMatch = new Regex($"{BaseFileName}([0-9]+)\\.atex");
 
         public static bool ReloadMod()
         {            
@@ -56,7 +56,7 @@ namespace Polaroid.Services.Penumbra
 
         private static string GetNextFileName()
         {
-            var lastTextureFileName = Directory.EnumerateFiles(GetTextureFolder()).Order().LastOrDefault();
+            var lastTextureFileName = Directory.EnumerateFiles(GetTextureFolder()).OrderBy(file => int.Parse(file.Split("_").Last().Split(".")[0])).LastOrDefault();
             Plugin.Log.Info("Last file name: " + lastTextureFileName);
             if (lastTextureFileName == null)
             {
