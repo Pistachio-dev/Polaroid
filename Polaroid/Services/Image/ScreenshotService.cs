@@ -5,6 +5,7 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.System.Photo;
 using InputInjection;
 using Penumbra.Import.Textures;
+using Polaroid.Services.Penumbra;
 using Serilog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -99,17 +100,20 @@ namespace Polaroid.Services.Image
                 .Pad(dimensionsWithBorder, dimensionsWithBorder, Color.White)
                 .Resize(new Size(resizeSize, resizeSize))))
             {
-                string screenshotDir = Path.GetDirectoryName(screenshotPath) ?? "C:";
-                string resultGuid = Guid.NewGuid().ToString();
-                string pathSquare = Path.Combine(screenshotDir, $"{resultGuid}.png");
-                dest.Save(pathSquare);
+                string textureFolderDir = PenumbraModManager.GetTextureFolder();
+                string polaroidFormatScreenshotFileName = Path.GetFileNameWithoutExtension(LastScreenshotPath) + ".png";
+                string pathSquarePhoto = Path.Combine(textureFolderDir, "Photos", polaroidFormatScreenshotFileName);
+                Plugin.Log.Info("Square photo path: " + pathSquarePhoto);
+                dest.Save(pathSquarePhoto);
+                string texturePath = PenumbraModManager.CleanOldFilesAndPrepareNextTexturePath();
 
-                string resultGuid2 = Guid.NewGuid().ToString();
-                string texPath = Path.Combine(screenshotDir, $"{resultGuid2}.tex");
+                Plugin.Log.Info(texturePath);
+                //string resultGuid2 = Guid.NewGuid().ToString();
+                //string texPath = Path.Combine(screenshotDir, $"{resultGuid2}.tex");
                 BaseImage baseImage = new BaseImage(dest);
                 var tm = new TextureManager(Plugin.DataManager, new OtterGui.Log.Logger(), Plugin.TextureProvider, Plugin.PluginInterface.UiBuilder);
                 //(byte[] rgba, int width, int height) = baseImage.GetPixelData();
-                tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, pathSquare, texPath).Wait();
+                tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, pathSquarePhoto, texturePath).Wait();
                 //tm.SavePng(baseImage, texPath, rgba, width, height).Wait();
             }            
         }
