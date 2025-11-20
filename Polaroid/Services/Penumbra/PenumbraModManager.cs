@@ -28,6 +28,12 @@ namespace Polaroid.Services.Penumbra
         private static string Group2JsonFileName = "group_002_sign.json";
         private static Regex RouteMatch = new Regex($"{BaseFileName}([0-9])+\\.atex");
 
+        public static bool ReloadMod()
+        {            
+            Plugin.PenumbraIpc.ReloadMod(GetModRootPath(), ModName);
+            Plugin.Log.Info("Mod reloaded");
+            return true;
+        }
         public static string GetModRootPath()
         {
             return Path.Combine(GetPenumbraModFolder(), ModName);

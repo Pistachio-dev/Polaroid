@@ -115,6 +115,7 @@ namespace Polaroid.Services.Image
                 var tm = new TextureManager(Plugin.DataManager, new OtterGui.Log.Logger(), Plugin.TextureProvider, Plugin.PluginInterface.UiBuilder);
                 //(byte[] rgba, int width, int height) = baseImage.GetPixelData();
                 tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, pathSquarePhoto, newTexturePath).Wait();
+                PenumbraModManager.ReloadMod();
                 //tm.SavePng(baseImage, texPath, rgba, width, height).Wait();
             }            
         }

@@ -5,6 +5,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FaderPlugin;
 using Polaroid.Services.EmoteDetection;
+using Polaroid.Services.Penumbra;
 using Polaroid.Windows;
 using System;
 using System.Diagnostics;
@@ -30,6 +31,8 @@ public sealed class Plugin : IDalamudPlugin
     public static Cammy.Cammy CammyPlugin { get; private set; }
     private const string CommandName = "/polaroid";
 
+    public static PenumbraIpc PenumbraIpc { get; private set; }
+
     public Configuration Configuration { get; init; }
 
     public readonly WindowSystem WindowSystem = new("Polaroid");
@@ -42,6 +45,7 @@ public sealed class Plugin : IDalamudPlugin
         CammyPlugin = new Cammy.Cammy(PluginInterface);
         UIVisControl = new UIVisibilityControl(Condition, ClientState, GameGui);
         emoteReader = new EmoteReaderHooks();
+        PenumbraIpc = new PenumbraIpc(PluginInterface);
 
         // you might normally want to embed resources and load them from the manifest stream
         var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
