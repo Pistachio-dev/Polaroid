@@ -27,7 +27,29 @@ namespace Polaroid.Services.Penumbra
         private static string Extension = ".atex";
         private static string Group2JsonFileName = "group_002_sign.json";
         private static Regex RouteMatch = new Regex($"{BaseFileName}([0-9]+)\\.atex");
+        public static void EnsureModExists()
+        {
+            if (!DoesHoldSignModExist())
+            {
+                string errorMessage = "Sign Holding [Hum] [Mittens] mod is missing";
+                Plugin.ChatGui.PrintError(errorMessage);
+                Plugin.Log.Error(errorMessage);
+                throw new NotImplementedException();
+            }
 
+            if (!IsModAdapated())
+            {
+                Plugin.Log.Warning("Adapting SignHolding mod to use this plugin");
+                AdaptDefault_Json();
+                Add_Photograph_Option();
+                Generate_Directories();
+                ReloadMod();
+            }
+            else
+            {
+                Plugin.Log.Info("SignHolding Mod is adapted");
+            }
+        }
         public static bool ReloadMod()
         {            
             Plugin.PenumbraIpc.ReloadMod(GetModRootPath(), ModName);
@@ -146,6 +168,65 @@ namespace Polaroid.Services.Penumbra
             string rootPath = polaroidConfigDirectory.Substring(0, polaroidConfigDirectory.LastIndexOf(Path.DirectorySeparatorChar));
             
             return rootPath;
+        }
+
+        private static bool DoesHoldSignModExist()
+        {
+            return Directory.Exists(GetModRootPath());
+        }
+
+        private static bool IsModAdapated()
+        {
+            return false;
+            return Directory.Exists(GetTextureFolder());
+        }
+
+        private static void AdaptDefault_Json()
+        {
+            Plugin.Log.Info("Adapting default_mod.json");
+            string path = Path.Combine(GetModRootPath(), "default_mod.json");
+            var textJson = File.ReadAllText(path);
+            var file = Json.Deserialize<DefaultModDefinitionFile>(textJson);
+            try
+            {            
+                file.Files.Add(@"Sign/photograph/vfx/signmod_df.atex", @"sign\\photograph\\vfx\\signmod_df.atex");
+            }
+            catch (ArgumentException)
+            {
+                Plugin.Log.Warning($"Entry already existed in {path}. Ignoring the file.");
+            }
+            File.WriteAllText(path, Json.Serialize(file));
+        }
+
+        private static void Add_Photograph_Option()
+        {
+            Plugin.Log.Info("Adapting group_002_sign.json");
+            string path = Path.Combine(GetModRootPath(), "group_002_sign.json");
+            var textJson = File.ReadAllText(path);
+            var file = Json.Deserialize<ModOptionsFile>(textJson);
+            var newOption = new OptionItem()
+            {
+                Name = "/photograph",
+                Description = "Show the latest /photograph in the sign. You might need to use the \"hold sign\" emote again for the new picture to be loaded for others",
+                Files = new() { { "vfx/signmod_df.atex", "Sign\\photograph\\vfx\\photograph_capture_0.atex" } },
+                FileSwaps = new(),
+                Manipulations = new()
+            };
+            try
+            {
+                file.Options.Add(newOption);
+            }
+            catch (ArgumentException)
+            {
+                Plugin.Log.Warning($"Entry already existed in {path}. Ignoring the file.");
+            }
+            File.WriteAllText(path, Json.Serialize(file));
+        }
+
+        private static void Generate_Directories()
+        {
+            Plugin.Log.Info("Generating directories group_002_sign.json");
+            Directory.CreateDirectory(Path.Combine(GetTextureFolder(), "Photos"));
         }
     }
 }

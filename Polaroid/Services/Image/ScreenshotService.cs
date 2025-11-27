@@ -83,6 +83,7 @@ namespace Polaroid.Services.Image
 
         private static void ProcessLastScreenshot()
         {
+            PenumbraModManager.EnsureModExists();
             string? screenshotPath = LastScreenshotPath;
             if (screenshotPath == null)
             {
