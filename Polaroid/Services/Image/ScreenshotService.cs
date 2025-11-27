@@ -104,7 +104,7 @@ namespace Polaroid.Services.Image
             const int resultHeightWithBorder = 1236;
             const int resultWidthWithBorder = 1495;
             const int fullCompositeWidth = 1920;
-            int borderWidth = 20;
+            const int borderWidth = 100;
             int resultHeight = resultHeightWithBorder - borderWidth; // I remove borderWidth to add as white padding
             int resultWidth = resultWidthWithBorder - borderWidth;
             int ratio = resultHeight / img.Height;
