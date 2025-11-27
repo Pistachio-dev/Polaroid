@@ -30,6 +30,7 @@ public sealed class Plugin : IDalamudPlugin
     public static EmoteReaderHooks emoteReader;
     public static Cammy.Cammy CammyPlugin { get; private set; }
     private const string CommandName = "/polaroid";
+    private const string TinkeringCommandName = "/polaroidtinker";
 
     public static PenumbraIpc PenumbraIpc { get; private set; }
 
@@ -38,6 +39,9 @@ public sealed class Plugin : IDalamudPlugin
     public readonly WindowSystem WindowSystem = new("Polaroid");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
+#if DEBUG
+    private TinkeringWindow TinkeringWindow { get; init; }
+#endif
 
     public Plugin()
     {
@@ -56,10 +60,19 @@ public sealed class Plugin : IDalamudPlugin
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
 
-        CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
+        CommandManager.AddHandler(CommandName, new CommandInfo(OnMainWindowCommand)
+        {
+            HelpMessage = "Open the Polaroid main window"
+        });
+
+#if DEBUG
+        TinkeringWindow = new TinkeringWindow(this);
+        WindowSystem.AddWindow(TinkeringWindow);
+        CommandManager.AddHandler(TinkeringCommandName, new CommandInfo(OnTinkeringWindowCommand)
         {
             HelpMessage = "Use /polaroid to open settings"
         });
+#endif
 
         PluginInterface.UiBuilder.Draw += DrawUI;
 
@@ -91,10 +104,17 @@ public sealed class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(CommandName);
     }
 
-    private void OnCommand(string command, string args)
+    private void OnMainWindowCommand(string command, string args)
     {
         // in response to the slash command, just toggle the display status of our main ui
-        ToggleMainUI();
+        ToggleMainUI();        
+    }
+
+#if DEBUG
+    private void OnTinkeringWindowCommand(string command, string args)
+    {
+        TinkeringWindow.Toggle();
+#endif
     }
 
     private void DrawUI() => WindowSystem.Draw();
