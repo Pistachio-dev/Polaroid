@@ -66,7 +66,8 @@ namespace Polaroid.Services.Penumbra
             var match = RouteMatch.Match(lastTextureFileName);
             if (match.Groups.Count < 2 || !int.TryParse(match.Groups[1].Value, out int number))
             {
-                throw new Exception($"Could not find a file matching the pattern in folder {GetTextureFolder()}");
+                Plugin.Log.Error($"Could not find a file matching the pattern in folder {GetTextureFolder()}");
+                return GetTextureFileName(0);
             }
 
             return GetTextureFileName(number + 1);

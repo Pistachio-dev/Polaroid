@@ -26,7 +26,12 @@
       <HintPath>..\PngToTexConverter\Penumbra\lib\OtterTex.dll</HintPath>
     </Reference>
   </ItemGroup>
-
+    <ItemGroup>
+        <Content Include="..\Data\signWithPoolWoodenTexturePart.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>false</Visible>
+        </Content>
+    </ItemGroup>
   <ItemGroup>
     <PackageReference Update="DalamudPackager" Version="13.1.0" />
   </ItemGroup>

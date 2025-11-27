@@ -1,5 +1,7 @@
+using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.JobGauge.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using ECommons.Configuration;
 using EmbedIO.Utilities;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.System.Photo;
@@ -76,52 +78,91 @@ namespace Polaroid.Services.Image
 
         public static void GeneratePhotoTexture()
         {
-            WaitUntilScreenshotReadable(() => ConvertToPolaroidLook(), 0);
+            WaitUntilScreenshotReadable(() => ProcessLastScreenshot(), 0);
         }
-        private static void ConvertToPolaroidLook()
+
+        private static void ProcessLastScreenshot()
         {
             string? screenshotPath = LastScreenshotPath;
             if (screenshotPath == null)
             {
                 Log.Error("Screenshot path null when trying to generate texture!");
-                return;
             }
+
+            var woodTexturePartPath = Path.Combine(Plugin.PluginInterface.AssemblyLocation.Directory?.FullName!, "signWithPoolWoodenTexturePart.png");
+            using Image<Rgba32> woodTexturePart = ImageSharpImage.Load<Rgba32>(woodTexturePartPath);
+            Console.WriteLine($"Loaded wooden texture with dimensions {woodTexturePart.Width} {woodTexturePart.Height}");
             using ImageSharpImage img = ImageSharpImage.Load<Rgba32>(screenshotPath);
             Console.WriteLine($"Loaded picture with dimensions {img.Width} {img.Height}");
+            using ImageSharpImage finishedTexture = ConvertToSignpostTexture(img, woodTexturePart);
 
-            // crop
-            int cropRectangleStart = (img.Width - img.Height) / 2;
-            var ratio = img.Width / img.Height;
-            int borderWidth = img.Height / 20;
-            Rectangle cropRectangle = new Rectangle(new Point(cropRectangleStart, 0), new Size(img.Width - 2 * cropRectangleStart - borderWidth, img.Height));
-            int heightWithBorder = img.Height + borderWidth;
-            int widthWithBorder = img.Height + borderWidth;
+            UpdateModPictures((Image<Rgba32>)img, (Image<Rgba32>)finishedTexture);
+        }
 
-            int resizeSize = heightWithBorder >= 1024 ? 1024 : 512;
-            using (Image<Rgba32> dest = (Image<Rgba32>)img.Clone(x =>
-                x
-                .Crop(cropRectangle)
-                //.Pad(widthWithBorder, heightWithBorder, Color.White)
-                .Resize(new Size(resizeSize, resizeSize))))
-            {
-                string textureFolderDir = PenumbraModManager.GetTextureFolder();
-                string polaroidFormatScreenshotFileName = Path.GetFileNameWithoutExtension(LastScreenshotPath) + ".png";
-                Directory.CreateDirectory(Path.Combine(textureFolderDir, "Photos"));
-                string pathSquarePhoto = Path.Combine(textureFolderDir, "Photos", polaroidFormatScreenshotFileName);
-                Plugin.Log.Info("Square photo path: " + pathSquarePhoto);
-                dest.Save(pathSquarePhoto);
-                string newTexturePath = PenumbraModManager.GetNewTextureFullPath();
-                PenumbraModManager.ModifyPhotographFileRoute();
-                Plugin.Log.Info(newTexturePath);
-                //string resultGuid2 = Guid.NewGuid().ToString();
-                //string texPath = Path.Combine(screenshotDir, $"{resultGuid2}.tex");
-                BaseImage baseImage = new BaseImage(dest);
-                var tm = new TextureManager(Plugin.DataManager, new OtterGui.Log.Logger(), Plugin.TextureProvider, Plugin.PluginInterface.UiBuilder);
-                //(byte[] rgba, int width, int height) = baseImage.GetPixelData();
-                tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, pathSquarePhoto, newTexturePath).Wait();
-                PenumbraModManager.ReloadMod();
-                //tm.SavePng(baseImage, texPath, rgba, width, height).Wait();
-            }            
+        private static ImageSharpImage ConvertToSignpostTexture(ImageSharpImage img, ImageSharpImage woodTexturePart)
+        {
+            const int resultHeightWithBorder = 1236;
+            const int resultWidthWithBorder = 1495;
+            const int fullCompositeWidth = 1920;
+            int borderWidth = 20;
+            int resultHeight = resultHeightWithBorder - borderWidth; // I remove borderWidth to add as white padding
+            int resultWidth = resultWidthWithBorder - borderWidth;
+            int ratio = resultHeight / img.Height;
+            int cropRectangleStart = Math.Max(0, (img.Width * ratio - resultWidth) / 2);
+            Rectangle cropRectangle = new Rectangle(new Point(cropRectangleStart, 0), new Size(resultHeight, resultWidth));
+            Plugin.Log.Info($"Crop rectangle size: {cropRectangle.Width}x{cropRectangle.Height}");
+            Plugin.Log.Info($"Resized image size: {img.Width * ratio}x{img.Height * ratio}");
+            Plugin.Log.Info($"Original image size: {img.Width}x{img.Height}");
+            using Image<Rgba32> adapted = FitToRectangle(img, new Size(resultWidth, resultHeight));
+            using Image<Rgba32> padded = adapted.Clone(img => img.Pad(resultWidthWithBorder, resultHeightWithBorder, Color.White));
+            var result = new Image<Rgba32>(fullCompositeWidth, resultHeightWithBorder);
+            result.Mutate(img => img.DrawImage(woodTexturePart, 1).DrawImage(padded, new Point(425, 0), 1));
+            result.Save(@$"E:\Penumbra\Sign Holding [Hum] [Mittens]\Sign\photograph\vfx\Photos\{Guid.NewGuid()}.png");
+
+            return result;
+        }
+
+        private static Image<Rgba32> FitToRectangle(ImageSharpImage img, Size resultToFillSize)
+        {
+            var factorH =  resultToFillSize.Height / (float)img.Width;
+            var factorV = resultToFillSize.Width / (float)img.Height;
+            var dominatingFactor = Math.Max(factorH, factorV);
+            Point cropRectangleStart = new Point((int)(img.Width * dominatingFactor - resultToFillSize.Width) / 2,
+                (int)(img.Height * dominatingFactor - resultToFillSize.Height) / 2);
+
+            int resizedW = (int)(img.Width * dominatingFactor);
+            int resizedH = (int)(img.Height * dominatingFactor);
+            var output = img.Clone(i => i.Resize(resizedW, resizedH).Crop(new Rectangle(cropRectangleStart, resultToFillSize)));
+            return (Image<Rgba32>)output;
+        }
+
+        private static string SaveOriginals(Image<Rgba32> originalScreenshot, bool isProcessed)
+        {
+            string textureFolderDir = PenumbraModManager.GetTextureFolder();
+            string screenshotFileName = Path.GetFileNameWithoutExtension(LastScreenshotPath)
+                + (isProcessed ? "_texture.png" :  ".png");
+            Directory.CreateDirectory(Path.Combine(textureFolderDir, "Photos"));
+            string screenshotPath = Path.Combine(textureFolderDir, "Photos", screenshotFileName);
+            Plugin.Log.Info("Raw photo path: " + screenshotPath);
+            originalScreenshot.Save(screenshotPath);
+
+            return screenshotPath;
+        }
+
+        private static void UpdateModPictures(Image<Rgba32> originalScreenshot, Image<Rgba32> texture)
+        {
+            var originalPath = SaveOriginals(originalScreenshot, false);
+            var textureAsPngPath = SaveOriginals(texture, true);          
+
+            string newTexturePath = PenumbraModManager.GetNewTextureFullPath();
+            PenumbraModManager.ModifyPhotographFileRoute();
+            Plugin.Log.Info("New texture path: " + newTexturePath);
+
+            BaseImage baseImage = new BaseImage(texture);
+            var tm = new TextureManager(Plugin.DataManager, new OtterGui.Log.Logger(), Plugin.TextureProvider, Plugin.PluginInterface.UiBuilder);
+            tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, textureAsPngPath, newTexturePath).Wait();
+            PenumbraModManager.ReloadMod();
+            //tm.SavePng(baseImage, texPath, rgba, width, height).Wait();
         }
 
         private static void WaitUntilScreenshotReadable(Action callback, int retryCounter)
