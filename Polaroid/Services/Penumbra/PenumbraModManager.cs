@@ -76,6 +76,11 @@ namespace Polaroid.Services.Penumbra
             return Path.Combine(PenumbraModFolder, TextureFolderPath);
         }
 
+        public static string GetIntermediatePicturesFolder()
+        {
+            return Path.Combine(PenumbraModFolder, TextureFolderPath, "Photos");
+        }
+
         public static string GetNewTextureFullPath()
         {
             var fileName = GetNextFileName();

@@ -98,17 +98,31 @@ namespace Polaroid.Services.Image
             
             using ImageSharpImage img = await ImageSharpImage.LoadAsync<Rgba32>(screenshotPath);
             Console.WriteLine($"Loaded picture with dimensions {img.Width} {img.Height}");
-            
-            using ImageSharpImage finishedTexture = await ConvertToSignpostTexture(img, woodTexturePart);
 
-            await UpdateModPictures((Image<Rgba32>)img, (Image<Rgba32>)finishedTexture);
+            using ImageSharpImage paddedScreenshot = await GeneratePaddedPhoto(img);
+            using ImageSharpImage finishedTexture = await ConvertToSignpostTexture(paddedScreenshot, woodTexturePart);
+
+            await UpdateModPictures((Image<Rgba32>)img, (Image<Rgba32>)paddedScreenshot, (Image<Rgba32>)finishedTexture);
         }
 
-        private static async Task<ImageSharpImage> ConvertToSignpostTexture(ImageSharpImage img, ImageSharpImage woodTexturePart)
+        private static async Task<ImageSharpImage> ConvertToSignpostTexture(ImageSharpImage padded, ImageSharpImage woodTexturePart)
+        {
+            const int fullCompositeWidth = 1920;
+
+            var guid = Guid.NewGuid();
+            Plugin.Log.Warning("saving padded picture to " + Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), $"{guid}_padded.png"));
+            await padded.SaveAsync(Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), $"{guid}_padded.png"));
+            var result = new Image<Rgba32>(fullCompositeWidth, woodTexturePart.Height);
+            result.Mutate(img => img.DrawImage(woodTexturePart, 1).DrawImage(padded, new Point(woodTexturePart.Width, 0), 1));
+            await result.SaveAsync(Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), $"{guid}_texture.png"));
+
+            return result;
+        }
+
+        private static async Task<ImageSharpImage> GeneratePaddedPhoto(ImageSharpImage img)
         {
             const int resultHeightWithBorder = 1236;
             const int resultWidthWithBorder = 1495;
-            const int fullCompositeWidth = 1920;
             const int borderWidth = 100;
             int resultHeight = resultHeightWithBorder - borderWidth; // I remove borderWidth to add as white padding
             int resultWidth = resultWidthWithBorder - borderWidth;
@@ -121,14 +135,9 @@ namespace Polaroid.Services.Image
             Plugin.Log.Info($"Original image size: {img.Width}x{img.Height}");
 
             using Image<Rgba32> adapted = FitToRectangle(img, new Size(resultWidth, resultHeight));
-            using Image<Rgba32> padded = adapted.Clone(img => img.Pad(resultWidthWithBorder, resultHeightWithBorder, Color.White));
-
-            var result = new Image<Rgba32>(fullCompositeWidth, resultHeightWithBorder);
-            result.Mutate(img => img.DrawImage(woodTexturePart, 1).DrawImage(padded, new Point(425, 0), 1));
-            await result.SaveAsync(@$"E:\Penumbra\Sign Holding [Hum] [Mittens]\Sign\photograph\vfx\Photos\{Guid.NewGuid()}.png");
-
-            return result;
+            return adapted.Clone(img => img.Pad(resultWidthWithBorder, resultHeightWithBorder, Color.White));
         }
+
 
         private static Image<Rgba32> FitToRectangle(ImageSharpImage img, Size resultToFillSize)
         {
@@ -144,11 +153,10 @@ namespace Polaroid.Services.Image
             return (Image<Rgba32>)output;
         }
 
-        private static async Task<string> SaveOriginals(Image<Rgba32> originalScreenshot, bool isProcessed)
+        private static async Task<string> SaveOriginals(Image<Rgba32> originalScreenshot, string suffix = "")
         {
             string textureFolderDir = PenumbraModManager.GetTextureFolder();
-            string screenshotFileName = Path.GetFileNameWithoutExtension(LastScreenshotPath)
-                + (isProcessed ? "_texture.png" :  ".png");
+            string screenshotFileName = $"{Path.GetFileNameWithoutExtension(LastScreenshotPath)}{suffix}.png";
             Directory.CreateDirectory(Path.Combine(textureFolderDir, "Photos"));
             string screenshotPath = Path.Combine(textureFolderDir, "Photos", screenshotFileName);
             Plugin.Log.Info("Raw photo path: " + screenshotPath);
@@ -157,10 +165,11 @@ namespace Polaroid.Services.Image
             return screenshotPath;
         }
 
-        private static async System.Threading.Tasks.Task UpdateModPictures(Image<Rgba32> originalScreenshot, Image<Rgba32> texture)
+        private static async System.Threading.Tasks.Task UpdateModPictures(Image<Rgba32> originalScreenshot, Image<Rgba32> padded, Image<Rgba32> texture)
         {
-            var originalPath = await SaveOriginals(originalScreenshot, false);
-            var textureAsPngPath = await SaveOriginals(texture, true);          
+            var originalPath = await SaveOriginals(originalScreenshot, "_original");
+            var paddedPath = await SaveOriginals(padded, "_photoprint");
+            var textureAsPngPath = await SaveOriginals(texture, "_signboardTexture");          
 
             string newTexturePath = PenumbraModManager.GetNewTextureFullPath();
             await PenumbraModManager.ModifyPhotographFileRoute();
