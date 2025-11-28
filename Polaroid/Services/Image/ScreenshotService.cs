@@ -27,6 +27,7 @@ namespace Polaroid.Services.Image
     public static class ScreenshotService // TODO: Make it inherit IDisposable
     {
         public static string? LastScreenshotPath = null;
+        public static string? LastPaddedPhotoPath = null;
         public unsafe static DateTime LastScreenshotDate => UnixTimeStampToLocalDateTime(ScreenShot.Instance()->ScreenShotTimestamp);
         private const int ScreenshotRetries = 10;
         private const int ScreenshotRetryFrameDelay = 5;        
@@ -169,6 +170,8 @@ namespace Polaroid.Services.Image
         {
             var originalPath = await SaveOriginals(originalScreenshot, "_original");
             var paddedPath = await SaveOriginals(padded, "_photoprint");
+            LastPaddedPhotoPath = paddedPath;
+            Plugin.Log.Info("Last padded photo path: " + LastPaddedPhotoPath);
             var textureAsPngPath = await SaveOriginals(texture, "_signboardTexture");          
 
             string newTexturePath = PenumbraModManager.GetNewTextureFullPath();

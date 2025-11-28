@@ -7,7 +7,7 @@ namespace Polaroid.Windows
 {
     public class PhotoPrintWindow: Window, IDisposable
     {
-        const string Url = @"E:\Penumbra\Sign Holding [Hum] [Mittens]\Sign\photograph\vfx\Photos\ffxiv_28112025_123121_137_photoprint.png";
+        private string? PicturePath = null;
 
         public int Height { get; }
 
@@ -19,9 +19,20 @@ namespace Polaroid.Windows
             Height = height;
         }        
 
+        public void SetPicturePath(string? path)
+        {
+            PicturePath = path;
+        }
+
         public override void Draw()
         {
-            var picture = Plugin.TextureProvider.GetFromFile(Url).GetWrapOrDefault();
+            if ( PicturePath == null)
+            {
+                Plugin.Log.Info("null photo");
+                return;
+            }
+            var picture = Plugin.TextureProvider.GetFromFile(PicturePath).GetWrapOrDefault();
+            //Plugin.Log.Info("Picture path: "+ PicturePath);
             if (picture != null)
             {
                 Size = new Vector2(picture.Width, picture.Height);

@@ -1,11 +1,6 @@
-using Dalamud.Interface.Windowing;
+using Polaroid.Services.Image;
 using Polaroid.Windows;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Polaroid.Services.PhotoSlide
 {
@@ -14,7 +9,7 @@ namespace Polaroid.Services.PhotoSlide
         private const int PhotoSlideDurationMs = 2847;
         private const int PhotoShowDurationMs = 4000;
         private Stopwatch stopwatch = new Stopwatch();
-        private Window window;
+        private PhotoPrintWindow window;
         private PhotoSlideState photoSlideState = PhotoSlideState.NotShowing;
         private float windowHeight;
 
@@ -24,11 +19,20 @@ namespace Polaroid.Services.PhotoSlide
             this.windowHeight = window.Height;
         }
 
-        public void StartSlide()
+        public void StartSlide(bool startTimer = true)
         {
+            if (startTimer)
+            {
+                stopwatch.Restart();
+            }
+
+            if (ScreenshotService.LastPaddedPhotoPath == null)
+            {
+                Plugin.Framework.RunOnTick(() => StartSlide(false));
+            }
+            window.SetPicturePath(ScreenshotService.LastPaddedPhotoPath);
             window.IsOpen = true;            
-            photoSlideState = PhotoSlideState.SlidingIn;
-            stopwatch.Restart();
+            photoSlideState = PhotoSlideState.SlidingIn;            
             TickSlide();
         }
 
