@@ -43,6 +43,10 @@ public unsafe class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
-        
+     
+        if(ImGui.Button("Show photo"))
+        {
+            Plugin.WindowSlideManager.StartSlide();
+        }
     }
 }

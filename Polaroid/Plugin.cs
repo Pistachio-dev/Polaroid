@@ -6,6 +6,7 @@ using Dalamud.Plugin.Services;
 using FaderPlugin;
 using Polaroid.Services.EmoteDetection;
 using Polaroid.Services.Penumbra;
+using Polaroid.Services.PhotoSlide;
 using Polaroid.Windows;
 using System;
 using System.Diagnostics;
@@ -41,6 +42,10 @@ public sealed class Plugin : IDalamudPlugin
     private MainWindow MainWindow { get; init; }
 #if DEBUG
     private TinkeringWindow TinkeringWindow { get; init; }
+
+    public PhotoPrintWindow PhotoPrintWindow { get; init; }
+
+    public WindowSlideManager WindowSlideManager { get; init; }
 #endif
 
     public Plugin()
@@ -56,9 +61,12 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this, goatImagePath);
+        PhotoPrintWindow = new PhotoPrintWindow(500);
+        WindowSlideManager = new WindowSlideManager(PhotoPrintWindow);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
+        WindowSystem.AddWindow(PhotoPrintWindow);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnMainWindowCommand)
         {
