@@ -19,7 +19,7 @@ namespace Polaroid.Services
         public static void OnPhotographEmote(IPlayerCharacter playerCharacter)
         {
             Plugin.Framework.RunOnTick(() => OnPhotographFlash(playerCharacter),
-                TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDealyMs));
+                TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs));
         }
 
         public static void OnPhotographFlash(IPlayerCharacter playerCharacter)
