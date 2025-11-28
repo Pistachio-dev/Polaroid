@@ -27,7 +27,18 @@ namespace Polaroid.Services.Penumbra
         private static string Extension = ".atex";
         private static string Group2JsonFileName = "group_002_sign.json";
         private static Regex RouteMatch = new Regex($"{BaseFileName}([0-9]+)\\.atex");
-        public static void EnsureModExists()
+        private static string MemoizedPenumbraModFolder = string.Empty;
+        public static string PenumbraModFolder { get
+            {
+                if (MemoizedPenumbraModFolder == string.Empty)
+                {
+                    MemoizedPenumbraModFolder = GetPenumbraModFolder();
+                }
+
+                return MemoizedPenumbraModFolder;
+        } }
+
+        public static async Task EnsureModExists()
         {
             if (!DoesHoldSignModExist())
             {
@@ -40,8 +51,8 @@ namespace Polaroid.Services.Penumbra
             if (!IsModAdapated())
             {
                 Plugin.Log.Warning("Adapting SignHolding mod to use this plugin");
-                AdaptDefault_Json();
-                Add_Photograph_Option();
+                await AdaptDefault_Json();
+                await Add_Photograph_Option();
                 Generate_Directories();
                 ReloadMod();
             }
@@ -58,11 +69,11 @@ namespace Polaroid.Services.Penumbra
         }
         public static string GetModRootPath()
         {
-            return Path.Combine(GetPenumbraModFolder(), ModName);
+            return Path.Combine(PenumbraModFolder, ModName);
         }
         public static string GetTextureFolder()
         {
-            return Path.Combine(GetPenumbraModFolder(), TextureFolderPath);
+            return Path.Combine(PenumbraModFolder, TextureFolderPath);
         }
 
         public static string GetNewTextureFullPath()
@@ -95,13 +106,6 @@ namespace Polaroid.Services.Penumbra
             return GetTextureFileName(number + 1);
         }
 
-        private static string GetTextureFullPath(int slot)
-        {
-            string penumbraModFolder = GetPenumbraModFolder();
-            string fullPath = Path.Combine(penumbraModFolder, TextureFolderPath, GetTextureFileName(slot));
-            return fullPath;
-        }
-
         private static string GetPenumbraModFolder()
         {
             string rootPath = GetAllPluginConfigFolder();
@@ -117,11 +121,11 @@ namespace Polaroid.Services.Penumbra
             return penumbraModFilesPath;
         }
 
-        public static void ModifyPhotographFileRoute()
+        public static async Task ModifyPhotographFileRoute()
         {
             var path = Path.Combine(GetModRootPath(), Group2JsonFileName);
             if (!File.Exists(path)) throw new Exception("Mod json file not found. Is it not installed?");
-            string jsonFile = File.ReadAllText(path);
+            string jsonFile = await File.ReadAllTextAsync(path);
             var match = RouteMatch.Match(jsonFile);
             string oldFileName = match.Groups[0].Value;
             string newFileName = GetNextFileName();
@@ -129,7 +133,7 @@ namespace Polaroid.Services.Penumbra
             Plugin.Log.Info("New file in config: " + newFileName);
                 
             jsonFile = jsonFile.Replace(oldFileName, newFileName);
-            File.WriteAllText(path, jsonFile);
+            await File.WriteAllTextAsync(path, jsonFile);
         }
 
         //private static string GetModConfigFilePath()
@@ -177,15 +181,14 @@ namespace Polaroid.Services.Penumbra
 
         private static bool IsModAdapated()
         {
-            return false;
             return Directory.Exists(GetTextureFolder());
         }
 
-        private static void AdaptDefault_Json()
+        private static async Task AdaptDefault_Json()
         {
             Plugin.Log.Info("Adapting default_mod.json");
             string path = Path.Combine(GetModRootPath(), "default_mod.json");
-            var textJson = File.ReadAllText(path);
+            var textJson = await File.ReadAllTextAsync(path);
             var file = Json.Deserialize<DefaultModDefinitionFile>(textJson);
             try
             {            
@@ -195,14 +198,14 @@ namespace Polaroid.Services.Penumbra
             {
                 Plugin.Log.Warning($"Entry already existed in {path}. Ignoring the file.");
             }
-            File.WriteAllText(path, Json.Serialize(file));
+            await File.WriteAllTextAsync(path, Json.Serialize(file));
         }
 
-        private static void Add_Photograph_Option()
+        private static async Task Add_Photograph_Option()
         {
             Plugin.Log.Info("Adapting group_002_sign.json");
             string path = Path.Combine(GetModRootPath(), "group_002_sign.json");
-            var textJson = File.ReadAllText(path);
+            var textJson = await File.ReadAllTextAsync(path);
             var file = Json.Deserialize<ModOptionsFile>(textJson);
             var newOption = new OptionItem()
             {
@@ -220,7 +223,7 @@ namespace Polaroid.Services.Penumbra
             {
                 Plugin.Log.Warning($"Entry already existed in {path}. Ignoring the file.");
             }
-            File.WriteAllText(path, Json.Serialize(file));
+            await File.WriteAllTextAsync(path, Json.Serialize(file));
         }
 
         private static void Generate_Directories()

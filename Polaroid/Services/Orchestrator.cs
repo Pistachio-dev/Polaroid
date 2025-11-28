@@ -28,7 +28,7 @@ namespace Polaroid.Services
             Vector2 cameraOffset = CameraOffsets.GetCameraOffset(playerCharacter);
             Vector3 newCameraPosition = CameraOffsets.ApplyOffset(playerCharacter, cameraOffset);
             CammyCameraAimService.MoveCamera(newCameraPosition, (float)(playerCharacter.Rotation + Math.PI), 0);
-            Plugin.Framework.RunOnTick(() => OnHiddenHUD(playerCharacter), TimeSpan.FromSeconds(1));
+            Plugin.Framework.RunOnTick(() => OnHiddenHUD(playerCharacter), TimeSpan.FromSeconds(0.5));            
         }
 
         public static void OnHiddenHUD(IPlayerCharacter playerCharacter)

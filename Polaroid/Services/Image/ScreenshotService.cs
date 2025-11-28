@@ -13,6 +13,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -23,10 +24,10 @@ using ImageSharpImage = SixLabors.ImageSharp.Image;
 
 namespace Polaroid.Services.Image
 {
-    public unsafe static class ScreenshotService // TODO: Make it inherit IDisposable
+    public static class ScreenshotService // TODO: Make it inherit IDisposable
     {
         public static string? LastScreenshotPath = null;
-        public static DateTime LastScreenshotDate => UnixTimeStampToLocalDateTime(ScreenShot.Instance()->ScreenShotTimestamp);
+        public unsafe static DateTime LastScreenshotDate => UnixTimeStampToLocalDateTime(ScreenShot.Instance()->ScreenShotTimestamp);
         private const int ScreenshotRetries = 10;
         private const int ScreenshotRetryFrameDelay = 5;        
 
@@ -78,12 +79,12 @@ namespace Polaroid.Services.Image
 
         public static void GeneratePhotoTexture()
         {
-            WaitUntilScreenshotReadable(() => ProcessLastScreenshot(), 0);
+            WaitUntilScreenshotReadable(() => _ = ProcessLastScreenshot(), 0);
         }
 
-        private static void ProcessLastScreenshot()
+        private static async System.Threading.Tasks.Task ProcessLastScreenshot()
         {
-            PenumbraModManager.EnsureModExists();
+            await PenumbraModManager.EnsureModExists();
             string? screenshotPath = LastScreenshotPath;
             if (screenshotPath == null)
             {
@@ -91,16 +92,19 @@ namespace Polaroid.Services.Image
             }
 
             var woodTexturePartPath = Path.Combine(Plugin.PluginInterface.AssemblyLocation.Directory?.FullName!, "signWithPoolWoodenTexturePart.png");
-            using Image<Rgba32> woodTexturePart = ImageSharpImage.Load<Rgba32>(woodTexturePartPath);
+            
+            using Image<Rgba32> woodTexturePart = await ImageSharpImage.LoadAsync<Rgba32>(woodTexturePartPath);
             Console.WriteLine($"Loaded wooden texture with dimensions {woodTexturePart.Width} {woodTexturePart.Height}");
-            using ImageSharpImage img = ImageSharpImage.Load<Rgba32>(screenshotPath);
+            
+            using ImageSharpImage img = await ImageSharpImage.LoadAsync<Rgba32>(screenshotPath);
             Console.WriteLine($"Loaded picture with dimensions {img.Width} {img.Height}");
-            using ImageSharpImage finishedTexture = ConvertToSignpostTexture(img, woodTexturePart);
+            
+            using ImageSharpImage finishedTexture = await ConvertToSignpostTexture(img, woodTexturePart);
 
-            UpdateModPictures((Image<Rgba32>)img, (Image<Rgba32>)finishedTexture);
+            await UpdateModPictures((Image<Rgba32>)img, (Image<Rgba32>)finishedTexture);
         }
 
-        private static ImageSharpImage ConvertToSignpostTexture(ImageSharpImage img, ImageSharpImage woodTexturePart)
+        private static async Task<ImageSharpImage> ConvertToSignpostTexture(ImageSharpImage img, ImageSharpImage woodTexturePart)
         {
             const int resultHeightWithBorder = 1236;
             const int resultWidthWithBorder = 1495;
@@ -111,14 +115,17 @@ namespace Polaroid.Services.Image
             int ratio = resultHeight / img.Height;
             int cropRectangleStart = Math.Max(0, (img.Width * ratio - resultWidth) / 2);
             Rectangle cropRectangle = new Rectangle(new Point(cropRectangleStart, 0), new Size(resultHeight, resultWidth));
+
             Plugin.Log.Info($"Crop rectangle size: {cropRectangle.Width}x{cropRectangle.Height}");
             Plugin.Log.Info($"Resized image size: {img.Width * ratio}x{img.Height * ratio}");
             Plugin.Log.Info($"Original image size: {img.Width}x{img.Height}");
+
             using Image<Rgba32> adapted = FitToRectangle(img, new Size(resultWidth, resultHeight));
             using Image<Rgba32> padded = adapted.Clone(img => img.Pad(resultWidthWithBorder, resultHeightWithBorder, Color.White));
+
             var result = new Image<Rgba32>(fullCompositeWidth, resultHeightWithBorder);
             result.Mutate(img => img.DrawImage(woodTexturePart, 1).DrawImage(padded, new Point(425, 0), 1));
-            result.Save(@$"E:\Penumbra\Sign Holding [Hum] [Mittens]\Sign\photograph\vfx\Photos\{Guid.NewGuid()}.png");
+            await result.SaveAsync(@$"E:\Penumbra\Sign Holding [Hum] [Mittens]\Sign\photograph\vfx\Photos\{Guid.NewGuid()}.png");
 
             return result;
         }
@@ -137,7 +144,7 @@ namespace Polaroid.Services.Image
             return (Image<Rgba32>)output;
         }
 
-        private static string SaveOriginals(Image<Rgba32> originalScreenshot, bool isProcessed)
+        private static async Task<string> SaveOriginals(Image<Rgba32> originalScreenshot, bool isProcessed)
         {
             string textureFolderDir = PenumbraModManager.GetTextureFolder();
             string screenshotFileName = Path.GetFileNameWithoutExtension(LastScreenshotPath)
@@ -145,18 +152,18 @@ namespace Polaroid.Services.Image
             Directory.CreateDirectory(Path.Combine(textureFolderDir, "Photos"));
             string screenshotPath = Path.Combine(textureFolderDir, "Photos", screenshotFileName);
             Plugin.Log.Info("Raw photo path: " + screenshotPath);
-            originalScreenshot.Save(screenshotPath);
+            await originalScreenshot.SaveAsync(screenshotPath);
 
             return screenshotPath;
         }
 
-        private static void UpdateModPictures(Image<Rgba32> originalScreenshot, Image<Rgba32> texture)
+        private static async System.Threading.Tasks.Task UpdateModPictures(Image<Rgba32> originalScreenshot, Image<Rgba32> texture)
         {
-            var originalPath = SaveOriginals(originalScreenshot, false);
-            var textureAsPngPath = SaveOriginals(texture, true);          
+            var originalPath = await SaveOriginals(originalScreenshot, false);
+            var textureAsPngPath = await SaveOriginals(texture, true);          
 
             string newTexturePath = PenumbraModManager.GetNewTextureFullPath();
-            PenumbraModManager.ModifyPhotographFileRoute();
+            await PenumbraModManager.ModifyPhotographFileRoute();
             Plugin.Log.Info("New texture path: " + newTexturePath);
 
             BaseImage baseImage = new BaseImage(texture);
@@ -189,7 +196,7 @@ namespace Polaroid.Services.Image
             Plugin.Framework.RunOnTick(() => WaitUntilScreenshotReadable(callback, retryCounter++), delayTicks: ScreenshotRetryFrameDelay);
         }
 
-        private static string GetScreenshotFileName(DateTime scTime)
+        private unsafe static string GetScreenshotFileName(DateTime scTime)
         {
             StringBuilder s = new StringBuilder();
             s.Append("ffxiv_");
