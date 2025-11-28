@@ -11,7 +11,7 @@ namespace Polaroid.Services.PhotoSlide
 {
     public class WindowSlideManager
     {
-        private const int PhotoSlideDurationMs = 2647;
+        private const int PhotoSlideDurationMs = 2847;
         private const int PhotoShowDurationMs = 4000;
         private Stopwatch stopwatch = new Stopwatch();
         private Window window;

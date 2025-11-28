@@ -45,7 +45,7 @@ public sealed class Plugin : IDalamudPlugin
 
     public PhotoPrintWindow PhotoPrintWindow { get; init; }
 
-    public WindowSlideManager WindowSlideManager { get; init; }
+    public static WindowSlideManager WindowSlideManager { get; private set; }
 #endif
 
     public Plugin()

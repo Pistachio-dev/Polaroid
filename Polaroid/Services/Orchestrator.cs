@@ -1,25 +1,21 @@
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Plugin.Services;
 using InputInjection;
 using Polaroid.Services.Camera;
 using Polaroid.Services.EmoteDetection;
 using Polaroid.Services.Image;
-using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Polaroid.Services
 {
     public static class Orchestrator
     {
+        private const int TimeFromFlashToPhoto = 2909;
         public static void OnPhotographEmote(IPlayerCharacter playerCharacter)
         {
             Plugin.Framework.RunOnTick(() => OnPhotographFlash(playerCharacter),
                 TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs));
+            Plugin.Framework.RunOnTick(Plugin.WindowSlideManager.StartSlide, TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs + TimeFromFlashToPhoto));
         }
 
         public static void OnPhotographFlash(IPlayerCharacter playerCharacter)
