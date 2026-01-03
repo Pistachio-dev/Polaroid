@@ -2,34 +2,41 @@
 <Project Sdk="Dalamud.NET.Sdk/14.0.1">
   <PropertyGroup>
     <Version>0.0.0.1</Version>
-    <Description>A plugin to augment the functionality of /photograph.</Description>
+      <TargetFramework>net10.0-windows</TargetFramework>
+      <Description>A plugin to augment the functionality of /photograph.</Description>
     <PackageProjectUrl>https://github.com/goatcorp/SamplePlugin</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.10" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Cammy\Cammy.csproj" />
     <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
+    <ProjectReference Include="..\Penumbra\Penumbra\Penumbra.csproj" />
     <ProjectReference Include="..\PngToTexConverter\Penumbra\Penumbra.csproj" />
-    <ProjectReference Include="..\xivFaderPlugin\FaderPlugin\faderPlugin.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="OtterTex">
-      <HintPath>..\PngToTexConverter\Penumbra\lib\OtterTex.dll</HintPath>
-    </Reference>
   </ItemGroup>
     <ItemGroup>
         <Content Include="..\Data\signWithPoolWoodenTexturePart.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Visible>false</Visible>
         </Content>
+    </ItemGroup>
+    <ItemGroup>
+      <Reference Include="OtterGui">
+        <HintPath>..\Penumbra\OtterGui\bin\Debug\OtterGui.dll</HintPath>
+      </Reference>
+      <Reference Include="OtterTex">
+        <HintPath>..\Penumbra\Penumbra\lib\OtterTex.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Update="DalamudPackager" Version="14.0.1" />
+      <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
     </ItemGroup>
 </Project>

@@ -214,11 +214,11 @@ public unsafe class TinkeringWindow : Window, IDisposable
     private unsafe void ShowHud()
     {
 
-        Plugin.UIVisControl.UpdateAddonVisibility(true);
+        //Plugin.UIVisControl.UpdateAddonVisibility(true);
     }
 
     private unsafe void HideHud()
     {
-        Plugin.UIVisControl.UpdateAddonVisibility(false);
+        //Plugin.UIVisControl.UpdateAddonVisibility(false);
     }
 }

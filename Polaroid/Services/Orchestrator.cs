@@ -15,7 +15,7 @@ namespace Polaroid.Services
         {
             Plugin.Framework.RunOnTick(() => OnPhotographFlash(playerCharacter),
                 TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs));
-            Plugin.Framework.RunOnTick(Plugin.WindowSlideManager.StartSlide, TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs + TimeFromFlashToPhoto));
+            Plugin.Framework.RunOnTick(() => Plugin.WindowSlideManager.StartSlide(), TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs + TimeFromFlashToPhoto));
         }
 
         public static void OnPhotographFlash(IPlayerCharacter playerCharacter)
