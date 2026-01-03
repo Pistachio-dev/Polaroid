@@ -49,6 +49,10 @@ namespace Polaroid.Windows.Widgets
                 {
                     ScreenshotService.SetModTextureFromPadded(imagePaths[current]);
                 }
+
+                ImGui.SameLine();
+
+                ImGui.TextUnformatted("This plugin works with the Sign Holding animation by Mittens");
             }
             
         }
