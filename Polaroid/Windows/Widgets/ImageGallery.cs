@@ -1,5 +1,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Components;
+using Polaroid.Services.Image;
 using Polaroid.Services.Penumbra;
 using System;
 using System.Collections.Generic;
@@ -40,6 +41,14 @@ namespace Polaroid.Windows.Widgets
                 RefreshImages();
             }
             DrawImage();
+            if (imagePaths.Count > 0)
+            {
+                if (ImGuiComponents.IconButtonWithText(Dalamud.Interface.FontAwesomeIcon.Sign, "Set as sign texture"))
+                {
+                    ScreenshotService.SetModTextureFromPadded(imagePaths[current]);
+                }
+            }
+            
         }
 
         public void RefreshImages()
@@ -50,16 +59,20 @@ namespace Polaroid.Windows.Widgets
 
         public void DrawImage()
         {
-            if (imagePaths.Count == 0 || imagePaths.Count <= imagePaths.Count)
+            if (imagePaths.Count == 0)
             {
                 return;
             }
             var route = imagePaths[current];
             var picture = Plugin.TextureProvider.GetFromFile(route).GetWrapOrDefault();
-            float sizeFactor = height / picture?.Height ?? 1;
+            float sizeFactor = height / (float)(picture?.Height ?? 1);
             if (picture != null)
             {
                 ImGui.Image(picture.Handle, new System.Numerics.Vector2((int)(picture.Width * sizeFactor), (int)(picture.Height * sizeFactor)));
+            }
+            else
+            {
+                Plugin.Log.Warning("Can't show picture in gallery. It is supposed to be in " + route);
             }
         }
 
@@ -78,7 +91,7 @@ namespace Polaroid.Windows.Widgets
 
         private IEnumerable<string> GetPaddedImagesRoutes()
         {
-            return Directory.EnumerateFiles(PenumbraModManager.GetIntermediatePicturesFolder(), "*_photoprint.png");
+            return Directory.EnumerateFiles(Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), "photoprint"), "*.png");
         }
 
 

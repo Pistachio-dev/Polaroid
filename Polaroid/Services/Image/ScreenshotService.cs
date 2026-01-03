@@ -180,6 +180,18 @@ namespace Polaroid.Services.Image
             //tm.SavePng(baseImage, texPath, rgba, width, height).Wait();
         }
 
+        public static async void SetModTextureFromPadded(string paddedPictureRoute)
+        {
+            string newTexturePath = PenumbraModManager.GetNewTextureFullPath();
+            await PenumbraModManager.ModifyPhotographFileRoute();
+
+            var textureRoute = paddedPictureRoute.Replace("photoprint", "signboardTexture");
+            using ImageSharpImage img = await ImageSharpImage.LoadAsync<Rgba32>(textureRoute);
+            var tm = new TextureManager(Plugin.DataManager, new OtterGui.Log.Logger(), Plugin.TextureProvider, Plugin.PluginInterface.UiBuilder);
+            tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, textureRoute, newTexturePath).Wait();
+            PenumbraModManager.ReloadMod();
+        }
+
         private static void WaitUntilScreenshotReadable(Action callback, int retryCounter)
         {
             if (LastScreenshotPath == null)
