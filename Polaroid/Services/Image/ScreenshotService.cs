@@ -77,11 +77,14 @@ namespace Polaroid.Services.Image
         private static async System.Threading.Tasks.Task ProcessLastScreenshot()
         {
             await PenumbraModManager.EnsureModExists();
+            
             string? screenshotPath = LastScreenshotPath;
             if (screenshotPath == null)
             {
                 Log.Error("Screenshot path null when trying to generate texture!");
             }
+
+            LastPaddedPhotoPath = null; // New one is being built
 
             var woodTexturePartPath = Path.Combine(Plugin.PluginInterface.AssemblyLocation.Directory?.FullName!, "signWithPoolWoodenTexturePart.png");
             
