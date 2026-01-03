@@ -26,6 +26,8 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Visible>false</Visible>
         </Content>
+        <Content Include="NewestRelease.json" />
+        <Content Include="Polaroid.json" />
     </ItemGroup>
     <ItemGroup>
       <Reference Include="OtterGui">
