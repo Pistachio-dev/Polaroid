@@ -10,7 +10,7 @@ namespace Polaroid.Services
 {
     public static class Orchestrator
     {
-        private const int TimeFromFlashToPhoto = 2809;
+        private const int TimeFromFlashToPhoto = 2909;
         public static void OnPhotographEmote(IPlayerCharacter playerCharacter)
         {
             Plugin.Framework.RunOnTick(() => OnPhotographFlash(playerCharacter),
