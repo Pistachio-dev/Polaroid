@@ -3,12 +3,11 @@ using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using FaderPlugin;
+using Polaroid.Services;
 using Polaroid.Services.EmoteDetection;
 using Polaroid.Services.Penumbra;
 using Polaroid.Services.PhotoSlide;
 using Polaroid.Windows;
-using System;
 using System.Diagnostics;
 using System.IO;
 namespace Polaroid;
@@ -27,13 +26,14 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
     [PluginService] internal static IGameInteropProvider SigScanner { get; private set; } = null!;
 
-    public UIVisibilityControl UIVisControl { get; }
     public static EmoteReaderHooks emoteReader;
     public static Cammy.Cammy CammyPlugin { get; private set; }
     private const string CommandName = "/polaroid";
     private const string TinkeringCommandName = "/polaroidtinker";
 
     public static PenumbraIpc PenumbraIpc { get; private set; }
+
+    public Orchestrator Orchestrator { get; private set; }
 
     public Configuration Configuration { get; init; }
 
@@ -52,9 +52,9 @@ public sealed class Plugin : IDalamudPlugin
     {
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         CammyPlugin = new Cammy.Cammy(PluginInterface);
-        UIVisControl = new UIVisibilityControl(Condition, ClientState, GameGui);
-        emoteReader = new EmoteReaderHooks();
+        emoteReader = new EmoteReaderHooks(this);
         PenumbraIpc = new PenumbraIpc(PluginInterface);
+        Orchestrator = new Orchestrator(this);
 
         // you might normally want to embed resources and load them from the manifest stream
         var goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");

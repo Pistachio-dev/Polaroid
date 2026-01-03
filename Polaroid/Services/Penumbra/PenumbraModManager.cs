@@ -1,17 +1,8 @@
-using Dalamud.Game.Network.Structures;
-using ECommons.Reflection;
-using FFXIVClientStructs;
-using Newtonsoft.Json.Linq;
 using Polaroid.Services.Penumbra.Model;
-using Serilog;
-using Swan.Formatters;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -42,7 +33,7 @@ namespace Polaroid.Services.Penumbra
         {
             if (!DoesHoldSignModExist())
             {
-                string errorMessage = "Sign Holding [Hum] [Mittens] mod is missing";
+                string errorMessage = "Download the \"Sign Holding [Hum] [Mittens]\" mod to save screenshots";
                 Plugin.ChatGui.PrintError(errorMessage);
                 Plugin.Log.Error(errorMessage);
                 throw new NotImplementedException();
@@ -84,7 +75,7 @@ namespace Polaroid.Services.Penumbra
         public static string GetNewTextureFullPath()
         {
             var fileName = GetNextFileName();
-            return Path.Combine(GetTextureFolder(), GetNextFileName());
+            return Path.Combine(GetTextureFolder(), fileName);
         }
 
         private static string GetTextureFileName(int number)
@@ -98,6 +89,7 @@ namespace Polaroid.Services.Penumbra
             Plugin.Log.Info("Last file name: " + lastTextureFileName);
             if (lastTextureFileName == null)
             {
+                Plugin.Log.Warning("No files detected. Making the first one.");
                 return GetTextureFileName(0);
             }
 
@@ -194,7 +186,7 @@ namespace Polaroid.Services.Penumbra
             Plugin.Log.Info("Adapting default_mod.json");
             string path = Path.Combine(GetModRootPath(), "default_mod.json");
             var textJson = await File.ReadAllTextAsync(path);
-            var file = Json.Deserialize<DefaultModDefinitionFile>(textJson);
+            var file = JsonSerializer.Deserialize<DefaultModDefinitionFile>(textJson);
             try
             {            
                 file.Files.Add(@"Sign/photograph/vfx/signmod_df.atex", @"sign\\photograph\\vfx\\signmod_df.atex");
@@ -203,7 +195,7 @@ namespace Polaroid.Services.Penumbra
             {
                 Plugin.Log.Warning($"Entry already existed in {path}. Ignoring the file.");
             }
-            await File.WriteAllTextAsync(path, Json.Serialize(file));
+            await File.WriteAllTextAsync(path, JsonSerializer.Serialize(file));
         }
 
         private static async Task Add_Photograph_Option()
@@ -211,7 +203,7 @@ namespace Polaroid.Services.Penumbra
             Plugin.Log.Info("Adapting group_002_sign.json");
             string path = Path.Combine(GetModRootPath(), "group_002_sign.json");
             var textJson = await File.ReadAllTextAsync(path);
-            var file = Json.Deserialize<ModOptionsFile>(textJson);
+            var file = JsonSerializer.Deserialize<ModOptionsFile>(textJson);
             var newOption = new OptionItem()
             {
                 Name = "/photograph",
@@ -228,7 +220,7 @@ namespace Polaroid.Services.Penumbra
             {
                 Plugin.Log.Warning($"Entry already existed in {path}. Ignoring the file.");
             }
-            await File.WriteAllTextAsync(path, Json.Serialize(file));
+            await File.WriteAllTextAsync(path, JsonSerializer.Serialize(file));
         }
 
         private static void Generate_Directories()

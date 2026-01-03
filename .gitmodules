@@ -10,3 +10,6 @@
 [submodule "PngToTexConverter"]
 	path = PngToTexConverter
 	url = https://github.com/Pistachio-dev/PngToTexConverter.git
+[submodule "Penumbra"]
+	path = Penumbra
+	url = https://github.com/xivdev/Penumbra.git

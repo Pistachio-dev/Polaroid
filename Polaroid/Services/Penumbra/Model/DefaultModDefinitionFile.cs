@@ -8,7 +8,7 @@ namespace Polaroid.Services.Penumbra.Model
 {
     public class DefaultModDefinitionFile
     {
-        public string Version { get; set; }
+        public int Version { get; set; }
         public Dictionary<string, string> Files { get; set; }
         public Dictionary<string, string> FileSwaps { get; set; }
         public List<string> Manipulations { get; set; }

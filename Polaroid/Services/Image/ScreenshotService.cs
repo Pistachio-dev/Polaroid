@@ -1,9 +1,3 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Game.ClientState.JobGauge.Enums;
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using ECommons.Configuration;
-using EmbedIO.Utilities;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.System.Photo;
 using InputInjection;
 using Penumbra.Import.Textures;
@@ -13,11 +7,8 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using ImageSharpImage = SixLabors.ImageSharp.Image;
@@ -86,11 +77,14 @@ namespace Polaroid.Services.Image
         private static async System.Threading.Tasks.Task ProcessLastScreenshot()
         {
             await PenumbraModManager.EnsureModExists();
+            
             string? screenshotPath = LastScreenshotPath;
             if (screenshotPath == null)
             {
                 Log.Error("Screenshot path null when trying to generate texture!");
             }
+
+            LastPaddedPhotoPath = null; // New one is being built
 
             var woodTexturePartPath = Path.Combine(Plugin.PluginInterface.AssemblyLocation.Directory?.FullName!, "signWithPoolWoodenTexturePart.png");
             
@@ -111,11 +105,11 @@ namespace Polaroid.Services.Image
             const int fullCompositeWidth = 1920;
 
             var guid = Guid.NewGuid();
-            Plugin.Log.Warning("saving padded picture to " + Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), $"{guid}_padded.png"));
-            await padded.SaveAsync(Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), $"{guid}_padded.png"));
+            Plugin.Log.Warning("saving padded picture to " + Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), "padded", $"{guid}.png"));
+            //await padded.SaveAsync(Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), "padded", $"{guid}_padded.png"));
             var result = new Image<Rgba32>(fullCompositeWidth, woodTexturePart.Height);
             result.Mutate(img => img.DrawImage(woodTexturePart, 1).DrawImage(padded, new Point(woodTexturePart.Width, 0), 1));
-            await result.SaveAsync(Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), $"{guid}_texture.png"));
+            //await result.SaveAsync(Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), "signboardTexture", $"{guid}.png"));
 
             return result;
         }
@@ -154,12 +148,13 @@ namespace Polaroid.Services.Image
             return (Image<Rgba32>)output;
         }
 
-        private static async Task<string> SaveOriginals(Image<Rgba32> originalScreenshot, string suffix = "")
+        private static async Task<string> SaveOriginals(Image<Rgba32> originalScreenshot, string subfolder)
         {
             string textureFolderDir = PenumbraModManager.GetTextureFolder();
-            string screenshotFileName = $"{Path.GetFileNameWithoutExtension(LastScreenshotPath)}{suffix}.png";
-            Directory.CreateDirectory(Path.Combine(textureFolderDir, "Photos"));
-            string screenshotPath = Path.Combine(textureFolderDir, "Photos", screenshotFileName);
+            string screenshotFileName = $"{Path.GetFileNameWithoutExtension(LastScreenshotPath)}.png";
+            
+            Directory.CreateDirectory(Path.Combine(textureFolderDir, "Photos", subfolder));
+            string screenshotPath = Path.Combine(textureFolderDir, "Photos", subfolder, screenshotFileName);
             Plugin.Log.Info("Raw photo path: " + screenshotPath);
             await originalScreenshot.SaveAsync(screenshotPath);
 
@@ -168,11 +163,11 @@ namespace Polaroid.Services.Image
 
         private static async System.Threading.Tasks.Task UpdateModPictures(Image<Rgba32> originalScreenshot, Image<Rgba32> padded, Image<Rgba32> texture)
         {
-            var originalPath = await SaveOriginals(originalScreenshot, "_original");
-            var paddedPath = await SaveOriginals(padded, "_photoprint");
+            var originalPath = await SaveOriginals(originalScreenshot, "original");
+            var paddedPath = await SaveOriginals(padded, "photoprint");
             LastPaddedPhotoPath = paddedPath;
             Plugin.Log.Info("Last padded photo path: " + LastPaddedPhotoPath);
-            var textureAsPngPath = await SaveOriginals(texture, "_signboardTexture");          
+            var textureAsPngPath = await SaveOriginals(texture, "signboardTexture");          
 
             string newTexturePath = PenumbraModManager.GetNewTextureFullPath();
             await PenumbraModManager.ModifyPhotographFileRoute();
@@ -183,6 +178,18 @@ namespace Polaroid.Services.Image
             tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, textureAsPngPath, newTexturePath).Wait();
             PenumbraModManager.ReloadMod();
             //tm.SavePng(baseImage, texPath, rgba, width, height).Wait();
+        }
+
+        public static async void SetModTextureFromPadded(string paddedPictureRoute)
+        {
+            string newTexturePath = PenumbraModManager.GetNewTextureFullPath();
+            await PenumbraModManager.ModifyPhotographFileRoute();
+
+            var textureRoute = paddedPictureRoute.Replace("photoprint", "signboardTexture");
+            using ImageSharpImage img = await ImageSharpImage.LoadAsync<Rgba32>(textureRoute);
+            var tm = new TextureManager(Plugin.DataManager, new OtterGui.Log.Logger(), Plugin.TextureProvider, Plugin.PluginInterface.UiBuilder);
+            tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, textureRoute, newTexturePath).Wait();
+            PenumbraModManager.ReloadMod();
         }
 
         private static void WaitUntilScreenshotReadable(Action callback, int retryCounter)

@@ -28,7 +28,7 @@ namespace Polaroid.Windows
         {
             if ( PicturePath == null)
             {
-                Plugin.Log.Info("null photo");
+                //Plugin.Log.Info("null photo");
                 return;
             }
             var picture = Plugin.TextureProvider.GetFromFile(PicturePath).GetWrapOrDefault();
@@ -37,7 +37,7 @@ namespace Polaroid.Windows
             {
                 Size = new Vector2(picture.Width, picture.Height);
                 float sizeFactor = Height / (float)picture.Height;
-                ImGui.Image(picture.Handle, new Vector2((int)(picture.Width * sizeFactor), (int)(picture.Width * sizeFactor)));
+                ImGui.Image(picture.Handle, new Vector2((int)(picture.Width * sizeFactor), (int)(picture.Height * sizeFactor)));
             }
         }
 
