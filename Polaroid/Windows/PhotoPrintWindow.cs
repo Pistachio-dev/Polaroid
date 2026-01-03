@@ -28,7 +28,7 @@ namespace Polaroid.Windows
         {
             if ( PicturePath == null)
             {
-                Plugin.Log.Info("null photo");
+                //Plugin.Log.Info("null photo");
                 return;
             }
             var picture = Plugin.TextureProvider.GetFromFile(PicturePath).GetWrapOrDefault();

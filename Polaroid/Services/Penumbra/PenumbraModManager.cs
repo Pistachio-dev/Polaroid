@@ -33,7 +33,7 @@ namespace Polaroid.Services.Penumbra
         {
             if (!DoesHoldSignModExist())
             {
-                string errorMessage = "Sign Holding [Hum] [Mittens] mod is missing";
+                string errorMessage = "Download the \"Sign Holding [Hum] [Mittens]\" mod to save screenshots";
                 Plugin.ChatGui.PrintError(errorMessage);
                 Plugin.Log.Error(errorMessage);
                 throw new NotImplementedException();
