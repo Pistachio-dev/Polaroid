@@ -8,31 +8,38 @@ using System.Numerics;
 
 namespace Polaroid.Services
 {
-    public static class Orchestrator
+    public class Orchestrator
     {
+        public Orchestrator(Plugin plugin)
+        {
+            this.plugin = plugin;
+        }
         private const int TimeFromFlashToPhoto = 2909;
-        public static void OnPhotographEmote(IPlayerCharacter playerCharacter)
+        private readonly Plugin plugin;
+
+        public void OnPhotographEmote(IPlayerCharacter playerCharacter)
         {
             Plugin.Framework.RunOnTick(() => OnPhotographFlash(playerCharacter),
                 TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs));
             Plugin.Framework.RunOnTick(() => Plugin.WindowSlideManager.StartSlide(), TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs + TimeFromFlashToPhoto));
         }
 
-        public static void OnPhotographFlash(IPlayerCharacter playerCharacter)
+        public void OnPhotographFlash(IPlayerCharacter playerCharacter)
         {
             InputFaker.PressHideHudKey();
             Vector2 cameraOffset = CameraOffsets.GetCameraOffset(playerCharacter);
             Vector3 newCameraPosition = CameraOffsets.ApplyOffset(playerCharacter, cameraOffset);
-            CammyCameraAimService.MoveCamera(newCameraPosition, (float)(playerCharacter.Rotation + Math.PI), 0);
-            Plugin.Framework.RunOnTick(() => OnHiddenHUD(playerCharacter), TimeSpan.FromSeconds(0.5));            
+            float angle = (float)(plugin.Configuration.Angle * Math.PI / 180);
+            CammyCameraAimService.MoveCamera(newCameraPosition, (float)(playerCharacter.Rotation + Math.PI), angle);
+            Plugin.Framework.RunOnTick(() => OnHiddenHUD(playerCharacter), TimeSpan.FromSeconds(0.5));
         }
 
-        public static void OnHiddenHUD(IPlayerCharacter playerCharacter)
+        public void OnHiddenHUD(IPlayerCharacter playerCharacter)
         {
             Plugin.Framework.RunOnTick(() => ScreenshotService.TakeScreenshot(() => OnScreenshotTaken(playerCharacter)), delayTicks: 1);
         }
 
-        public static void OnScreenshotTaken(IPlayerCharacter playerCharacter)
+        public void OnScreenshotTaken(IPlayerCharacter playerCharacter)
         {
             InputFaker.PressHideHudKey();
             CammyCameraAimService.DisableCodeMovable();

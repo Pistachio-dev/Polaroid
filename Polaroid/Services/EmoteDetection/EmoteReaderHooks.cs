@@ -22,10 +22,10 @@ namespace Polaroid.Services.EmoteDetection
 
         public delegate void OnEmoteFuncDelegate(ulong unk, ulong instigatorAddr, ushort emoteId, ulong targetId, ulong unk2);
         private readonly Hook<OnEmoteFuncDelegate>? hookEmote;
-
+        private readonly Plugin plugin;
         public bool IsValid = false;
 
-        public EmoteReaderHooks()
+        public EmoteReaderHooks(Plugin plugin)
         {
             try
             {
@@ -38,6 +38,8 @@ namespace Polaroid.Services.EmoteDetection
             {
                 Plugin.Log.Error(ex, "failed to hook emotes!");
             }
+
+            this.plugin = plugin;
         }
 
         public void Dispose()
@@ -70,7 +72,7 @@ namespace Polaroid.Services.EmoteDetection
             Plugin.Log.Warning($"Emote detected with id: {emoteId}");
             if (emoteId == PhotographEmoteId || emoteId == U_PhotograhEmoteId)
             {
-                Orchestrator.OnPhotographEmote(Plugin.ClientState.LocalPlayer!);
+                plugin.Orchestrator.OnPhotographEmote(Plugin.ClientState.LocalPlayer!);
             }            
         }
     }

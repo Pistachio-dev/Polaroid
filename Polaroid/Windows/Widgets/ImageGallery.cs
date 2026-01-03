@@ -40,6 +40,8 @@ namespace Polaroid.Windows.Widgets
             if (ImGui.Button("Refresh")){
                 RefreshImages();
             }
+            ImGui.SameLine();
+            ImGui.TextUnformatted("Photo gallery");
             DrawImage();
             if (imagePaths.Count > 0)
             {
