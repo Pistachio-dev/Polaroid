@@ -75,7 +75,7 @@ namespace Polaroid.Services.Penumbra
         public static string GetNewTextureFullPath()
         {
             var fileName = GetNextFileName();
-            return Path.Combine(GetTextureFolder(), GetNextFileName());
+            return Path.Combine(GetTextureFolder(), fileName);
         }
 
         private static string GetTextureFileName(int number)
@@ -89,6 +89,7 @@ namespace Polaroid.Services.Penumbra
             Plugin.Log.Info("Last file name: " + lastTextureFileName);
             if (lastTextureFileName == null)
             {
+                Plugin.Log.Warning("No files detected. Making the first one.");
                 return GetTextureFileName(0);
             }
 

@@ -170,7 +170,7 @@ namespace Polaroid.Services.Image
             Plugin.Log.Info("New texture path: " + newTexturePath);
 
             BaseImage baseImage = new BaseImage(texture);
-            var tm = new TextureManager(Plugin.DataManager, null, Plugin.TextureProvider, Plugin.PluginInterface.UiBuilder);
+            var tm = new TextureManager(Plugin.DataManager, new OtterGui.Log.Logger(), Plugin.TextureProvider, Plugin.PluginInterface.UiBuilder);
             tm.SaveAs(CombinedTexture.TextureSaveType.BC7, false, true, textureAsPngPath, newTexturePath).Wait();
             PenumbraModManager.ReloadMod();
             //tm.SavePng(baseImage, texPath, rgba, width, height).Wait();
