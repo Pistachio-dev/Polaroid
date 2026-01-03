@@ -20,12 +20,12 @@ public unsafe class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
-        var angle = plugin.Configuration.Angle;
-        if (ImGui.DragFloat("Camera angle (degrees)", ref angle, 1, -90, 90))
-        {
-            plugin.Configuration.Angle = angle;
-            plugin.Configuration.Save();
-        }
+        //var angle = plugin.Configuration.Angle;
+        //if (ImGui.DragFloat("Camera angle (degrees)", ref angle, 1, -90, 90))
+        //{
+        //    plugin.Configuration.Angle = angle;
+        //    plugin.Configuration.Save();
+        //}
 
         imageGallery.Draw();
     }

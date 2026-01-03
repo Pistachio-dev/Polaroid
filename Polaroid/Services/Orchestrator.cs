@@ -29,8 +29,8 @@ namespace Polaroid.Services
             InputFaker.PressHideHudKey();
             Vector2 cameraOffset = CameraOffsets.GetCameraOffset(playerCharacter);
             Vector3 newCameraPosition = CameraOffsets.ApplyOffset(playerCharacter, cameraOffset);
-            float angle = (float)(plugin.Configuration.Angle * Math.PI / 180);
-            CammyCameraAimService.MoveCamera(newCameraPosition, (float)(playerCharacter.Rotation + Math.PI), angle);
+            //float angle = (float)(plugin.Configuration.Angle * Math.PI / 180);
+            CammyCameraAimService.MoveCamera(newCameraPosition, (float)(playerCharacter.Rotation + Math.PI), 0);
             Plugin.Framework.RunOnTick(() => OnHiddenHUD(playerCharacter), TimeSpan.FromSeconds(0.5));
         }
 
