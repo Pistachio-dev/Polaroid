@@ -1,0 +1,23 @@
+[
+  {
+    "Author": "Pistachio Herald",
+    "Name": "Polaroid",
+    "Punchline": "Makes /photograph take an actual picture.",
+    "Description": "Makes /photograph take an actual picture",
+    "ApplicableVersion": "any",
+    "Tags": [
+        "instapix",
+        "photograph",
+        "photo",
+        "screenshot",
+        "gpose"
+    ],
+    "DalamudApiLevel": 14,
+    "AssemblyVersion": "0.1.2.1",
+    "Changelog": "Initial release",
+    "DownloadLinkInstall": "https://github.com/Pistachio-dev/NorthStar/releases/download/0.1.2.1_release/NorthStar.zip",
+    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/NorthStar/releases/download/0.1.2.1_release/NorthStar.zip",
+    "LastUpdate": 1767434974,
+    "InternalName": "Polaroid"
+  }
+]

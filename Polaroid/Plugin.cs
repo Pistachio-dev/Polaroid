@@ -42,11 +42,12 @@ public sealed class Plugin : IDalamudPlugin
     private MainWindow MainWindow { get; init; }
 #if DEBUG
     private TinkeringWindow TinkeringWindow { get; init; }
+#endif
 
     public PhotoPrintWindow PhotoPrintWindow { get; init; }
 
     public static WindowSlideManager WindowSlideManager { get; private set; }
-#endif
+
 
     public Plugin()
     {
@@ -61,6 +62,7 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigWindow = new ConfigWindow(this);
         MainWindow = new MainWindow(this, goatImagePath);
+
         PhotoPrintWindow = new PhotoPrintWindow(500);
         WindowSlideManager = new WindowSlideManager(PhotoPrintWindow);
 
@@ -122,8 +124,9 @@ public sealed class Plugin : IDalamudPlugin
     private void OnTinkeringWindowCommand(string command, string args)
     {
         TinkeringWindow.Toggle();
-#endif
     }
+#endif
+
 
     private void DrawUI() => WindowSystem.Draw();
 
