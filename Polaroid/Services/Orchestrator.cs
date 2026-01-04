@@ -14,14 +14,13 @@ namespace Polaroid.Services
         {
             this.plugin = plugin;
         }
-        private const int TimeFromFlashToPhoto = 2700;//2909;
         private readonly Plugin plugin;
 
         public void OnPhotographEmote(IPlayerCharacter playerCharacter)
         {
             Plugin.Framework.RunOnTick(() => OnPhotographFlash(playerCharacter),
                 TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs));
-            Plugin.Framework.RunOnTick(() => Plugin.WindowSlideManager.StartSlide(), TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs + TimeFromFlashToPhoto));
+            Plugin.Framework.RunOnTick(() => Plugin.WindowSlideManager.StartSlide(), TimeSpan.FromMilliseconds(EmoteReaderHooks.PhotographScreenshotDelayMs + EmoteReaderHooks.TimeFromFlashToPhoto));
         }
 
         public void OnPhotographFlash(IPlayerCharacter playerCharacter)

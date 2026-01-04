@@ -14,7 +14,8 @@ namespace Polaroid.Services.EmoteDetection
     {
         public const int PhotographEmoteId = 288;
         public const int U_PhotograhEmoteId = 290;
-        public const int PhotographScreenshotDelayMs = 5380;
+        public const int TimeFromFlashToPhoto = 3209;
+        public const int PhotographScreenshotDelayMs = 5080;
 
         public const int VisageEmoteId = 286;
 
