@@ -1,5 +1,6 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Components;
+using EmbedIO.Authentication;
 using Polaroid.Services.Image;
 using Polaroid.Services.Penumbra;
 using System;
@@ -20,6 +21,8 @@ namespace Polaroid.Windows.Widgets
         public ImageGallery(int height)
         {
             this.height = height;
+            RefreshImages();
+            current = imagePaths.Count - 1;
         }
         public void Draw()
         {
@@ -97,7 +100,13 @@ namespace Polaroid.Windows.Widgets
 
         private IEnumerable<string> GetPaddedImagesRoutes()
         {
-            return Directory.EnumerateFiles(Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), "photoprint"), "*.png");
+            var directory = Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), "photoprint");
+
+            if (!Directory.Exists(directory))
+            {
+                return new List<string>();
+            }
+            return Directory.EnumerateFiles(directory, "*.png");
         }
 
 
