@@ -13,11 +13,11 @@
         "gpose"
     ],
     "DalamudApiLevel": 14,
-    "AssemblyVersion": "0.0.0.3",
+    "AssemblyVersion": "0.0.0.5",
     "Changelog": "Initial release",
-    "DownloadLinkInstall": "https://github.com/Pistachio-dev/Polaroid/releases/download/0.0.0.4_release/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/Polaroid/releases/download/0.0.0.4_release/latest.zip",
-    "LastUpdate": 1767529109,
+    "DownloadLinkInstall": "https://github.com/Pistachio-dev/Polaroid/releases/download/0.0.0.5_bugfix/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/Pistachio-dev/Polaroid/releases/download/0.0.0.5_bugfix/latest.zip",
+    "LastUpdate": 1767545032,
     "InternalName": "Polaroid",
     "IconUrl": "https://raw.githubusercontent.com/Pistachio-dev/Polaroid/refs/heads/master/Polaroid/polaroidIcon.png",
   }
