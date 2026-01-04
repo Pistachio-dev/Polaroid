@@ -14,7 +14,7 @@ namespace Polaroid.Services
         {
             this.plugin = plugin;
         }
-        private const int TimeFromFlashToPhoto = 2909;
+        private const int TimeFromFlashToPhoto = 2700;//2909;
         private readonly Plugin plugin;
 
         public void OnPhotographEmote(IPlayerCharacter playerCharacter)
