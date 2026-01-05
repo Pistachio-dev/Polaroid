@@ -1,14 +1,9 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Components;
-using EmbedIO.Authentication;
+using ECommons.Throttlers;
 using Polaroid.Services.Image;
-using Polaroid.Services.Penumbra;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Polaroid.Windows.Widgets
 {
@@ -80,7 +75,10 @@ namespace Polaroid.Windows.Widgets
             }
             else
             {
-                Plugin.Log.Warning("Can't show picture in gallery. It is supposed to be in " + route);
+                if (EzThrottler.Throttle("nullGalleryPicture"))
+                {
+                    Plugin.Log.Warning("Can't show picture in gallery. It is supposed to be in " + route);
+                }                
             }
         }
 
