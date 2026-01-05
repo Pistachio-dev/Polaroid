@@ -105,7 +105,7 @@ namespace Polaroid.Services.Image
             const int fullCompositeWidth = 1920;
 
             var guid = Guid.NewGuid();
-            Plugin.Log.Warning("saving padded picture to " + Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), "padded", $"{guid}.png"));
+            Plugin.Log.Warning("saving padded picture to " + Path.Combine(Plugin.PluginInterface.GetPluginConfigDirectory(), "padded", $"{guid}.png"));
             //await padded.SaveAsync(Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), "padded", $"{guid}_padded.png"));
             var result = new Image<Rgba32>(fullCompositeWidth, woodTexturePart.Height);
             result.Mutate(img => img.DrawImage(woodTexturePart, 1).DrawImage(padded, new Point(woodTexturePart.Width, 0), 1));
@@ -153,8 +153,8 @@ namespace Polaroid.Services.Image
             string textureFolderDir = PenumbraModManager.GetTextureFolder();
             string screenshotFileName = $"{Path.GetFileNameWithoutExtension(LastScreenshotPath)}.png";
             
-            Directory.CreateDirectory(Path.Combine(textureFolderDir, "Photos", subfolder));
-            string screenshotPath = Path.Combine(textureFolderDir, "Photos", subfolder, screenshotFileName);
+            var dir = Directory.CreateDirectory(Path.Combine(Plugin.PluginInterface.GetPluginConfigDirectory(), "Photos", subfolder));
+            string screenshotPath = Path.Combine(dir.FullName, screenshotFileName);
             Plugin.Log.Info("Raw photo path: " + screenshotPath);
             await originalScreenshot.SaveAsync(screenshotPath);
 

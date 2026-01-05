@@ -100,7 +100,7 @@ namespace Polaroid.Windows.Widgets
 
         private IEnumerable<string> GetPaddedImagesRoutes()
         {
-            var directory = Path.Combine(PenumbraModManager.GetIntermediatePicturesFolder(), "photoprint");
+            var directory = Path.Combine(Plugin.PluginInterface.GetPluginConfigDirectory(), "Photos", "photoprint");
 
             if (!Directory.Exists(directory))
             {
@@ -108,7 +108,5 @@ namespace Polaroid.Windows.Widgets
             }
             return Directory.EnumerateFiles(directory, "*.png");
         }
-
-
     }
 }

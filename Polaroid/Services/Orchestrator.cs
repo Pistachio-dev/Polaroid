@@ -38,11 +38,14 @@ namespace Polaroid.Services
             Plugin.Framework.RunOnTick(() => ScreenshotService.TakeScreenshot(() => OnScreenshotTaken(playerCharacter)), delayTicks: 1);
         }
 
-        public void OnScreenshotTaken(IPlayerCharacter playerCharacter)
+        public void OnScreenshotTaken(IPlayerCharacter playerCharacter, bool success = true)
         {
             InputFaker.PressHideHudKey();
             CammyCameraAimService.DisableCodeMovable();
-            ScreenshotService.GeneratePhotoTexture();
+            if (success)
+            {
+                ScreenshotService.GeneratePhotoTexture();
+            }
         }
     }
 }
