@@ -59,7 +59,6 @@ namespace Polaroid.Windows.Widgets
             }
             
         }
-
         public void RefreshImages()
         {
             imagePaths.Clear();

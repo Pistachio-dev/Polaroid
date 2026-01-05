@@ -33,11 +33,11 @@ namespace Polaroid.Services.Penumbra
         {
             if (!DoesHoldSignModExist())
             {
-                string ad = "Download the \"Sign Holding [Hum] [Mittens]\" mod to show off your photos. " +
+                string ad = $"Download the \"{ModName}\" mod to show off your photos. " +
                     "Just take a picture after installing it and then use the \"photograph\" option. " +
                     "https://www.xivmodarchive.com/modid/104016";
                 Plugin.ChatGui.Print(ad);
-                Plugin.Log.Error(ad);
+                Plugin.Log.Info(ad);
                 return;
             }
 

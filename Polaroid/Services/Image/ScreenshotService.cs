@@ -28,19 +28,45 @@ namespace Polaroid.Services.Image
         }
 
         // The callback receives the full path of the screenshot.
-        public static unsafe void TakeScreenshot(Action callback)
+        public static async Task<bool> TakeScreenshot()
         {
-            InputFaker.PressScreenshotKey();
-            Plugin.Framework.RunOnTick(() => TakeScreenshotWithRetry(callback), delayTicks: ScreenshotRetryFrameDelay);
-        }
 
-        private static unsafe void TakeScreenshotWithRetry(Action callback, int retryCounter = 0)
-        {
-            InputFaker.PressScreenshotKey();
-            if (retryCounter >= ScreenshotRetries)
+            int retryCounter = 0;
+            while (!TakeScreenshotWithRetry() && retryCounter < ScreenshotRetries)
+            {
+                retryCounter++;
+            }
+
+            if (retryCounter == ScreenshotRetries)
             {
                 Plugin.Log.Warning("Screenshot retrieval failed!");
+                return false;
             }
+
+            return true;
+        }       
+
+        public static async Task GeneratePhotoTexture()
+        {
+            var attempts = 0;
+            var maxAttempts = 30;
+            while (!WaitUntilScreenshotReadable() && attempts < maxAttempts)
+            {
+                attempts++;
+                await Task.Delay(100);
+            }
+
+            if (attempts >= maxAttempts)
+            {
+                Plugin.Log.Error($"Could not read the screenshot after {attempts} attempts.");
+            }
+
+            await ProcessLastScreenshot();
+        }
+
+        private static unsafe bool TakeScreenshotWithRetry()
+        {
+            InputFaker.PressScreenshotKey();
 
             string screenshotRoute = ScreenShot.Instance()->ThreadPtr->ScreenShotStorageDirectory.ToString();
             long timeStamp = ScreenShot.Instance()->ScreenShotTimestamp;
@@ -48,7 +74,7 @@ namespace Polaroid.Services.Image
             if (DateTime.Now - scTime > TimeSpan.FromSeconds(10))
             {
                 Log.Verbose("Screenshot not yet taken. Timestamp is old.");
-                TakeScreenshotWithRetry(callback, retryCounter++);
+                return false;
             }
 
             string fileName = GetScreenshotFileName(scTime);
@@ -57,21 +83,16 @@ namespace Polaroid.Services.Image
                 .FirstOrDefault();
             if (fullPath == null)
             {
-                Log.Verbose($"Screenshot not yet found. Retrying ({retryCounter})");
-                TakeScreenshotWithRetry(callback, retryCounter++);
+                Log.Verbose($"Screenshot not yet found. Retrying...)");
+                return false;
             }
             else
             {
                 fullPath = fullPath.Replace("/", "\\");
                 LastScreenshotPath = fullPath;
                 Plugin.Log.Info("Retrieved path: " + fullPath);
-                callback();
+                return true;
             }
-        }
-
-        public static void GeneratePhotoTexture()
-        {
-            WaitUntilScreenshotReadable(() => _ = ProcessLastScreenshot(), 0);
         }
 
         private static async System.Threading.Tasks.Task ProcessLastScreenshot()
@@ -161,7 +182,7 @@ namespace Polaroid.Services.Image
             return screenshotPath;
         }
 
-        private static async System.Threading.Tasks.Task UpdateModPictures(Image<Rgba32> originalScreenshot, Image<Rgba32> padded, Image<Rgba32> texture)
+        private static async Task UpdateModPictures(Image<Rgba32> originalScreenshot, Image<Rgba32> padded, Image<Rgba32> texture)
         {
             var originalPath = await SaveOriginals(originalScreenshot, "original");
             var paddedPath = await SaveOriginals(padded, "photoprint");
@@ -192,27 +213,21 @@ namespace Polaroid.Services.Image
             PenumbraModManager.ReloadMod();
         }
 
-        private static void WaitUntilScreenshotReadable(Action callback, int retryCounter)
+        private static bool WaitUntilScreenshotReadable()
         {
             if (LastScreenshotPath == null)
             {
                 Log.Error("Last screenshot path is not set!");
-                return;
-            }
-
-            if (retryCounter >= ScreenshotRetries)
-            {
-                Log.Error("Exceeded retry maximum when trying to convert screenshot to .tex");
+                return false;
             }
 
             bool inUse = Utilities.IsFileInUse(LastScreenshotPath);
-            if (!inUse)
+            if (inUse)
             {
-                callback();
-                return;
+                return false;
             }
 
-            Plugin.Framework.RunOnTick(() => WaitUntilScreenshotReadable(callback, retryCounter++), delayTicks: ScreenshotRetryFrameDelay);
+            return true;
         }
 
         private unsafe static string GetScreenshotFileName(DateTime scTime)
